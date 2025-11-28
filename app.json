@@ -24,7 +24,13 @@
       },
       "package": "com.wiseevent.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -58,8 +64,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": ""
+        "projectId": "5b8115cf-50a8-4766-89e3-e99ff44dea6b"
       }
-    }
+    },
+    "owner": "chhinhs"
   }
 }
