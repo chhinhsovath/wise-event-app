@@ -1,0 +1,1860 @@
+{
+    "project": {
+      "name": "WISE Event Management App",
+      "description": "A comprehensive event management mobile application inspired by WISE Qatar, designed for educational summits, conferences, and large-scale events",
+      "version": "1.1.0",
+      "platforms": ["ios", "android"],
+      "inspiration": "WISE Qatar - World Innovation Summit for Education",
+      "updates": ["Added Clerk SSO integration for enterprise authentication"]
+    },
+  
+    "tech_stack": {
+      "frontend": {
+        "framework": "React Native",
+        "version": "0.76+",
+        "build_tool": "Expo SDK 52+",
+        "language": "TypeScript",
+        "navigation": "Expo Router v4",
+        "state_management": {
+          "global": "Zustand",
+          "server_state": "TanStack Query (React Query)",
+          "forms": "React Hook Form + Zod"
+        },
+        "ui_components": {
+          "base": "React Native Paper / NativeWind (Tailwind)",
+          "icons": "Expo Vector Icons / Lucide React Native",
+          "animations": "React Native Reanimated 3",
+          "gestures": "React Native Gesture Handler"
+        },
+        "storage": {
+          "local": "MMKV",
+          "secure": "Expo SecureStore"
+        }
+      },
+  
+      "authentication": {
+        "primary": "Clerk",
+        "version": "@clerk/clerk-expo ^2.0.0",
+        "description": "Clerk handles all authentication, SSO, and user management",
+        "features": [
+          "Email/Password authentication",
+          "Social OAuth providers",
+          "Enterprise SSO (SAML, OIDC)",
+          "Multi-factor authentication",
+          "Session management",
+          "User profile management",
+          "Organization/tenant support"
+        ],
+        "sso_providers": {
+          "social": ["google", "apple", "facebook", "linkedin", "twitter", "github"],
+          "enterprise": {
+            "saml": ["Okta", "Azure AD", "OneLogin", "Google Workspace", "Custom SAML"],
+            "oidc": ["Auth0", "Keycloak", "Custom OIDC"]
+          }
+        }
+      },
+  
+      "backend": {
+        "platform": "Appwrite Cloud / Self-hosted",
+        "version": "1.5+",
+        "role": "Database, Storage, Realtime, Functions (NOT authentication)",
+        "services_used": [
+          "Databases",
+          "Storage",
+          "Realtime",
+          "Functions"
+        ],
+        "note": "Appwrite Auth is NOT used - Clerk handles all authentication"
+      },
+  
+      "architecture_pattern": {
+        "name": "Clerk + Appwrite Hybrid",
+        "description": "Clerk manages authentication and user identity, Appwrite handles data persistence and realtime",
+        "flow": [
+          "1. User authenticates via Clerk (SSO, email, social)",
+          "2. Clerk returns JWT token with user ID",
+          "3. App creates/syncs user profile in Appwrite database",
+          "4. Appwrite Functions verify Clerk JWT for protected operations",
+          "5. Realtime subscriptions filter by Clerk user ID"
+        ]
+      },
+  
+      "additional_services": {
+        "push_notifications": "Expo Notifications + Appwrite Functions",
+        "analytics": "Expo Analytics / Appwrite Functions",
+        "crash_reporting": "Sentry",
+        "maps": "React Native Maps / Mapbox",
+        "qr_code": "expo-barcode-scanner / expo-camera"
+      },
+  
+      "development_tools": {
+        "package_manager": "pnpm / yarn",
+        "linting": "ESLint + Prettier",
+        "testing": {
+          "unit": "Jest",
+          "e2e": "Detox / Maestro"
+        },
+        "ci_cd": "EAS Build + EAS Submit"
+      }
+    },
+  
+    "clerk_configuration": {
+      "setup": {
+        "dashboard_url": "https://dashboard.clerk.com",
+        "documentation": "https://clerk.com/docs/quickstarts/expo"
+      },
+  
+      "environment_variables": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_xxx or pk_live_xxx",
+        "CLERK_SECRET_KEY": "sk_test_xxx or sk_live_xxx (server-side only)"
+      },
+  
+      "sso_configuration": {
+        "social_connections": {
+          "description": "Configure in Clerk Dashboard > User & Authentication > Social Connections",
+          "providers": [
+            {
+              "name": "Google",
+              "setup": "Enable in dashboard, add OAuth credentials from Google Cloud Console"
+            },
+            {
+              "name": "Apple",
+              "setup": "Enable in dashboard, configure Apple Developer credentials"
+            },
+            {
+              "name": "LinkedIn",
+              "setup": "Enable in dashboard, add LinkedIn OAuth app credentials"
+            },
+            {
+              "name": "Microsoft",
+              "setup": "Enable in dashboard, configure Azure AD app registration"
+            }
+          ]
+        },
+  
+        "enterprise_sso": {
+          "description": "Configure in Clerk Dashboard > User & Authentication > Enterprise Connections",
+          "saml_setup": {
+            "steps": [
+              "1. Create SAML connection in Clerk Dashboard",
+              "2. Get Clerk's ACS URL and Entity ID",
+              "3. Configure IdP (Okta, Azure AD, etc.) with Clerk's details",
+              "4. Import IdP metadata to Clerk",
+              "5. Map attributes (email, name, etc.)",
+              "6. Enable connection"
+            ],
+            "supported_idps": [
+              "Okta",
+              "Azure Active Directory",
+              "Google Workspace",
+              "OneLogin",
+              "PingIdentity",
+              "JumpCloud",
+              "Custom SAML 2.0"
+            ]
+          },
+          "oidc_setup": {
+            "steps": [
+              "1. Create OIDC connection in Clerk Dashboard",
+              "2. Configure external IdP with Clerk's redirect URI",
+              "3. Add IdP's client ID, secret, and discovery URL to Clerk",
+              "4. Map claims to Clerk user attributes",
+              "5. Enable connection"
+            ]
+          }
+        },
+  
+        "organization_sso": {
+          "description": "Allow organizations to configure their own SSO",
+          "features": [
+            "Per-organization SSO configuration",
+            "Domain verification for automatic SSO routing",
+            "JIT (Just-In-Time) user provisioning",
+            "SCIM user sync (Enterprise plan)"
+          ]
+        }
+      },
+  
+      "session_management": {
+        "features": [
+          "Automatic token refresh",
+          "Multi-session support",
+          "Device management",
+          "Session revocation",
+          "Active session listing"
+        ]
+      },
+  
+      "multi_factor_auth": {
+        "methods": [
+          "SMS OTP",
+          "Authenticator app (TOTP)",
+          "Backup codes",
+          "Passkeys/WebAuthn"
+        ],
+        "enforcement": ["Optional", "Required for all", "Required for admins"]
+      },
+  
+      "webhooks": {
+        "description": "Sync Clerk events to Appwrite",
+        "events": [
+          {
+            "event": "user.created",
+            "action": "Create user profile document in Appwrite"
+          },
+          {
+            "event": "user.updated",
+            "action": "Update user profile in Appwrite"
+          },
+          {
+            "event": "user.deleted",
+            "action": "Soft delete or anonymize user data in Appwrite"
+          },
+          {
+            "event": "session.created",
+            "action": "Log login activity (optional)"
+          },
+          {
+            "event": "organization.created",
+            "action": "Create organization record in Appwrite"
+          },
+          {
+            "event": "organizationMembership.created",
+            "action": "Add user to organization in Appwrite"
+          }
+        ]
+      }
+    },
+  
+    "features": {
+      "authentication": {
+        "module": "auth",
+        "description": "Complete authentication via Clerk with SSO support",
+        "provider": "Clerk",
+        "functions": [
+          {
+            "id": "AUTH_001",
+            "name": "Email Registration",
+            "description": "User registration with email and password",
+            "clerk_component": "<SignUp />",
+            "clerk_hook": "useSignUp()"
+          },
+          {
+            "id": "AUTH_002",
+            "name": "Email Login",
+            "description": "User login with email and password",
+            "clerk_component": "<SignIn />",
+            "clerk_hook": "useSignIn()"
+          },
+          {
+            "id": "AUTH_003",
+            "name": "Social OAuth Login",
+            "description": "Login via social providers",
+            "clerk_method": "signIn.authenticateWithRedirect({ strategy: 'oauth_google' })",
+            "providers": ["google", "apple", "linkedin", "facebook", "twitter", "github"]
+          },
+          {
+            "id": "AUTH_004",
+            "name": "Enterprise SSO (SAML)",
+            "description": "SAML-based SSO for enterprise organizations",
+            "clerk_method": "signIn.authenticateWithRedirect({ strategy: 'saml', identifier: 'user@company.com' })",
+            "flow": "Email domain detection → Redirect to IdP → Return with SAML assertion → Clerk session"
+          },
+          {
+            "id": "AUTH_005",
+            "name": "Enterprise SSO (OIDC)",
+            "description": "OIDC-based SSO for enterprise organizations",
+            "clerk_method": "signIn.authenticateWithRedirect({ strategy: 'oauth_custom_oidc' })"
+          },
+          {
+            "id": "AUTH_006",
+            "name": "Magic Link Login",
+            "description": "Passwordless authentication via email link",
+            "clerk_method": "signIn.create({ identifier: email, strategy: 'email_link' })"
+          },
+          {
+            "id": "AUTH_007",
+            "name": "OTP Login",
+            "description": "One-time password via email or SMS",
+            "clerk_method": "signIn.create({ identifier, strategy: 'email_code' | 'phone_code' })"
+          },
+          {
+            "id": "AUTH_008",
+            "name": "Passkey/WebAuthn Login",
+            "description": "Biometric/hardware key authentication",
+            "clerk_method": "signIn.authenticateWithPasskey()"
+          },
+          {
+            "id": "AUTH_009",
+            "name": "Multi-Factor Authentication",
+            "description": "Second factor verification",
+            "clerk_methods": ["prepareTOTP()", "verifyTOTP()", "preparePhoneNumberVerification()"],
+            "factors": ["totp", "phone_code", "backup_code"]
+          },
+          {
+            "id": "AUTH_010",
+            "name": "Session Management",
+            "description": "Get current session, logout, manage devices",
+            "clerk_hooks": ["useAuth()", "useSession()", "useSessionList()"],
+            "methods": ["signOut()", "session.revoke()"]
+          },
+          {
+            "id": "AUTH_011",
+            "name": "Profile Management",
+            "description": "Update user profile and preferences",
+            "clerk_component": "<UserProfile />",
+            "clerk_hook": "useUser()",
+            "methods": ["user.update()", "user.setProfileImage()"]
+          },
+          {
+            "id": "AUTH_012",
+            "name": "Password Management",
+            "description": "Change password, forgot password flow",
+            "clerk_methods": ["user.updatePassword()", "signIn.create({ strategy: 'reset_password_email_code' })"]
+          },
+          {
+            "id": "AUTH_013",
+            "name": "Organization Management",
+            "description": "Create and manage organizations for event groups",
+            "clerk_hooks": ["useOrganization()", "useOrganizationList()"],
+            "features": ["Create org", "Invite members", "Manage roles", "Configure org SSO"]
+          },
+          {
+            "id": "AUTH_014",
+            "name": "User Sync to Appwrite",
+            "description": "Sync Clerk user to Appwrite database on auth events",
+            "implementation": "Clerk webhook → Appwrite Function → Create/Update user document",
+            "trigger": "user.created, user.updated webhooks"
+          }
+        ]
+      },
+  
+      "event_schedule": {
+        "module": "schedule",
+        "description": "Complete event agenda and session management",
+        "functions": [
+          {
+            "id": "SCH_001",
+            "name": "View Full Agenda",
+            "description": "Display all events organized by date and time",
+            "appwrite_service": "databases.listDocuments()",
+            "filters": ["date", "track", "type", "venue"]
+          },
+          {
+            "id": "SCH_002",
+            "name": "Session Details",
+            "description": "View detailed information about a specific session",
+            "appwrite_service": "databases.getDocument()",
+            "data": ["title", "description", "speakers", "venue", "capacity", "materials"]
+          },
+          {
+            "id": "SCH_003",
+            "name": "Filter Sessions",
+            "description": "Filter agenda by track, type, date, or speaker",
+            "appwrite_service": "databases.listDocuments() with Query"
+          },
+          {
+            "id": "SCH_004",
+            "name": "Search Sessions",
+            "description": "Full-text search across sessions and speakers",
+            "appwrite_service": "databases.listDocuments() with Query.search()"
+          },
+          {
+            "id": "SCH_005",
+            "name": "Session Categories",
+            "description": "Organize sessions by type",
+            "categories": ["keynote", "panel", "workshop", "networking", "breakout", "exhibition"]
+          },
+          {
+            "id": "SCH_006",
+            "name": "Live Session Indicator",
+            "description": "Show currently active sessions",
+            "implementation": "Real-time check against current timestamp"
+          },
+          {
+            "id": "SCH_007",
+            "name": "Session Capacity",
+            "description": "Display available seats and registration status",
+            "appwrite_service": "databases.getDocument() + realtime subscription"
+          },
+          {
+            "id": "SCH_008",
+            "name": "Multi-day Support",
+            "description": "Handle events spanning multiple days",
+            "ui_component": "Date tabs / Calendar picker"
+          }
+        ]
+      },
+  
+      "personal_agenda": {
+        "module": "my_agenda",
+        "description": "Personalized schedule and bookmarking system",
+        "functions": [
+          {
+            "id": "AGN_001",
+            "name": "Bookmark Session",
+            "description": "Add session to personal agenda",
+            "appwrite_service": "databases.createDocument('bookmarks')",
+            "auth": "Clerk userId from useAuth()"
+          },
+          {
+            "id": "AGN_002",
+            "name": "Remove Bookmark",
+            "description": "Remove session from personal agenda",
+            "appwrite_service": "databases.deleteDocument('bookmarks')"
+          },
+          {
+            "id": "AGN_003",
+            "name": "View Personal Agenda",
+            "description": "Display user's bookmarked sessions",
+            "appwrite_service": "databases.listDocuments() with clerkUserId filter"
+          },
+          {
+            "id": "AGN_004",
+            "name": "Session Reminders",
+            "description": "Set push notification reminders for sessions",
+            "appwrite_service": "Appwrite Functions + Expo Notifications",
+            "options": ["15min", "30min", "1hour", "1day"]
+          },
+          {
+            "id": "AGN_005",
+            "name": "Conflict Detection",
+            "description": "Warn when bookmarking overlapping sessions",
+            "implementation": "Client-side time overlap check"
+          },
+          {
+            "id": "AGN_006",
+            "name": "Export Agenda",
+            "description": "Export personal agenda to calendar",
+            "implementation": "expo-calendar integration",
+            "formats": ["ics", "native_calendar"]
+          },
+          {
+            "id": "AGN_007",
+            "name": "Agenda Sync",
+            "description": "Sync bookmarks across devices",
+            "appwrite_service": "Realtime subscription on bookmarks"
+          },
+          {
+            "id": "AGN_008",
+            "name": "Session Notes",
+            "description": "Add personal notes to bookmarked sessions",
+            "appwrite_service": "databases.updateDocument('bookmarks')"
+          }
+        ]
+      },
+  
+      "speakers": {
+        "module": "speakers",
+        "description": "Speaker directory and profile management",
+        "functions": [
+          {
+            "id": "SPK_001",
+            "name": "Speaker Directory",
+            "description": "Browse all speakers with search and filter",
+            "appwrite_service": "databases.listDocuments('speakers')"
+          },
+          {
+            "id": "SPK_002",
+            "name": "Speaker Profile",
+            "description": "View detailed speaker information",
+            "data": ["name", "photo", "title", "organization", "bio", "social_links", "sessions"]
+          },
+          {
+            "id": "SPK_003",
+            "name": "Speaker Sessions",
+            "description": "View all sessions by a specific speaker",
+            "appwrite_service": "databases.listDocuments() with speaker_id filter"
+          },
+          {
+            "id": "SPK_004",
+            "name": "Follow Speaker",
+            "description": "Follow speakers for updates and notifications",
+            "appwrite_service": "databases.createDocument('follows')"
+          },
+          {
+            "id": "SPK_005",
+            "name": "Speaker Search",
+            "description": "Search speakers by name, organization, or expertise",
+            "appwrite_service": "Query.search()"
+          },
+          {
+            "id": "SPK_006",
+            "name": "Featured Speakers",
+            "description": "Highlight keynote and featured speakers",
+            "appwrite_service": "Query.equal('featured', true)"
+          },
+          {
+            "id": "SPK_007",
+            "name": "Speaker Categories",
+            "description": "Filter speakers by expertise or track",
+            "filters": ["track", "organization_type", "expertise"]
+          }
+        ]
+      },
+  
+      "networking": {
+        "module": "networking",
+        "description": "Attendee networking and messaging system",
+        "functions": [
+          {
+            "id": "NET_001",
+            "name": "Attendee Directory",
+            "description": "Browse and search other attendees",
+            "appwrite_service": "databases.listDocuments('users')",
+            "privacy": "Respect visibility preferences"
+          },
+          {
+            "id": "NET_002",
+            "name": "Attendee Profile",
+            "description": "View attendee public profile",
+            "data": ["name", "photo", "title", "organization", "interests", "social_links"]
+          },
+          {
+            "id": "NET_003",
+            "name": "Connection Request",
+            "description": "Send connection request to other attendees",
+            "appwrite_service": "databases.createDocument('connections')",
+            "status": ["pending", "accepted", "declined"]
+          },
+          {
+            "id": "NET_004",
+            "name": "Manage Connections",
+            "description": "Accept, decline, or remove connections",
+            "appwrite_service": "databases.updateDocument() / deleteDocument()"
+          },
+          {
+            "id": "NET_005",
+            "name": "Direct Messaging",
+            "description": "Send private messages to connections",
+            "appwrite_service": "databases.createDocument('messages') + Realtime"
+          },
+          {
+            "id": "NET_006",
+            "name": "Real-time Chat",
+            "description": "Live messaging with typing indicators",
+            "appwrite_service": "Realtime subscription on messages collection"
+          },
+          {
+            "id": "NET_007",
+            "name": "Message Notifications",
+            "description": "Push notifications for new messages",
+            "appwrite_service": "Appwrite Functions + Expo Notifications"
+          },
+          {
+            "id": "NET_008",
+            "name": "Schedule Meeting",
+            "description": "Request a meeting with another attendee",
+            "appwrite_service": "databases.createDocument('meeting_requests')",
+            "data": ["requester", "recipient", "proposed_times", "location", "purpose"]
+          },
+          {
+            "id": "NET_009",
+            "name": "Meeting Management",
+            "description": "Accept, decline, reschedule meetings",
+            "appwrite_service": "databases.updateDocument('meeting_requests')"
+          },
+          {
+            "id": "NET_010",
+            "name": "Contact Exchange",
+            "description": "Share contact info via QR code",
+            "implementation": "Generate QR with Clerk user ID, scan to connect"
+          },
+          {
+            "id": "NET_011",
+            "name": "Interest Matching",
+            "description": "Suggest connections based on shared interests",
+            "appwrite_service": "Appwrite Functions for matching algorithm"
+          },
+          {
+            "id": "NET_012",
+            "name": "Block User",
+            "description": "Block unwanted contacts",
+            "appwrite_service": "databases.createDocument('blocks')"
+          }
+        ]
+      },
+  
+      "venue_map": {
+        "module": "map",
+        "description": "Interactive venue navigation",
+        "functions": [
+          {
+            "id": "MAP_001",
+            "name": "Venue Overview",
+            "description": "Display venue floor plan",
+            "implementation": "Custom SVG map or image-based map"
+          },
+          {
+            "id": "MAP_002",
+            "name": "Multi-floor Navigation",
+            "description": "Switch between building floors",
+            "ui_component": "Floor selector tabs"
+          },
+          {
+            "id": "MAP_003",
+            "name": "Room Locator",
+            "description": "Find specific rooms and session venues",
+            "implementation": "Highlight room on map, show path"
+          },
+          {
+            "id": "MAP_004",
+            "name": "Points of Interest",
+            "description": "Show key locations",
+            "poi_types": ["registration", "restrooms", "food", "exits", "first_aid", "prayer_room", "wifi_zones"]
+          },
+          {
+            "id": "MAP_005",
+            "name": "Session Room Link",
+            "description": "Navigate to map from session details",
+            "implementation": "Deep link to map with room highlighted"
+          },
+          {
+            "id": "MAP_006",
+            "name": "Search Locations",
+            "description": "Search for specific rooms or facilities",
+            "implementation": "Filter POIs by name or type"
+          },
+          {
+            "id": "MAP_007",
+            "name": "Exhibitor Booths",
+            "description": "Display exhibition hall layout with booth info",
+            "appwrite_service": "databases.listDocuments('exhibitors')"
+          },
+          {
+            "id": "MAP_008",
+            "name": "Live Occupancy",
+            "description": "Show current crowd density in areas",
+            "appwrite_service": "Appwrite Functions with check-in data"
+          }
+        ]
+      },
+  
+      "notifications": {
+        "module": "notifications",
+        "description": "Push and in-app notification system",
+        "functions": [
+          {
+            "id": "NOT_001",
+            "name": "Push Notification Setup",
+            "description": "Register device for push notifications",
+            "implementation": "Expo Notifications + store token in Appwrite with Clerk userId"
+          },
+          {
+            "id": "NOT_002",
+            "name": "Session Reminders",
+            "description": "Automated reminders for bookmarked sessions",
+            "trigger": "Scheduled Appwrite Function"
+          },
+          {
+            "id": "NOT_003",
+            "name": "Event Announcements",
+            "description": "Broadcast important updates to all attendees",
+            "appwrite_service": "Appwrite Functions for batch notifications"
+          },
+          {
+            "id": "NOT_004",
+            "name": "Schedule Changes",
+            "description": "Notify when bookmarked sessions change",
+            "appwrite_service": "Realtime + Appwrite Functions"
+          },
+          {
+            "id": "NOT_005",
+            "name": "Message Notifications",
+            "description": "Alert for new chat messages",
+            "appwrite_service": "Appwrite Functions trigger on message create"
+          },
+          {
+            "id": "NOT_006",
+            "name": "Connection Alerts",
+            "description": "Notify for connection requests and acceptances",
+            "appwrite_service": "Appwrite Functions trigger"
+          },
+          {
+            "id": "NOT_007",
+            "name": "In-app Notifications",
+            "description": "Display notification feed within app",
+            "appwrite_service": "databases.listDocuments('notifications')"
+          },
+          {
+            "id": "NOT_008",
+            "name": "Notification Preferences",
+            "description": "User controls for notification types",
+            "settings": ["session_reminders", "messages", "announcements", "connections", "schedule_changes"]
+          },
+          {
+            "id": "NOT_009",
+            "name": "Mark as Read",
+            "description": "Track read/unread notification status",
+            "appwrite_service": "databases.updateDocument()"
+          },
+          {
+            "id": "NOT_010",
+            "name": "Badge Count",
+            "description": "Show unread count on app icon",
+            "implementation": "Expo Notifications badge API"
+          }
+        ]
+      },
+  
+      "check_in": {
+        "module": "check_in",
+        "description": "Event and session check-in system",
+        "functions": [
+          {
+            "id": "CHK_001",
+            "name": "Event Registration QR",
+            "description": "Display personal QR code for event check-in",
+            "implementation": "Generate QR from Clerk userId + event ID"
+          },
+          {
+            "id": "CHK_002",
+            "name": "Self Check-in",
+            "description": "Check into sessions via QR scan",
+            "implementation": "expo-barcode-scanner"
+          },
+          {
+            "id": "CHK_003",
+            "name": "NFC Check-in",
+            "description": "Check-in via NFC badge tap",
+            "implementation": "react-native-nfc-manager (optional)"
+          },
+          {
+            "id": "CHK_004",
+            "name": "Geofence Check-in",
+            "description": "Auto check-in when entering venue",
+            "implementation": "expo-location geofencing"
+          },
+          {
+            "id": "CHK_005",
+            "name": "Attendance History",
+            "description": "View sessions attended",
+            "appwrite_service": "databases.listDocuments('check_ins')"
+          },
+          {
+            "id": "CHK_006",
+            "name": "Certificate Generation",
+            "description": "Generate attendance certificate",
+            "appwrite_service": "Appwrite Functions for PDF generation"
+          },
+          {
+            "id": "CHK_007",
+            "name": "Session Feedback",
+            "description": "Submit feedback after session check-out",
+            "appwrite_service": "databases.createDocument('feedback')"
+          }
+        ]
+      },
+  
+      "content": {
+        "module": "content",
+        "description": "Event content and resource management",
+        "functions": [
+          {
+            "id": "CNT_001",
+            "name": "Session Materials",
+            "description": "Access presentation slides and documents",
+            "appwrite_service": "storage.listFiles() + getFileDownload()"
+          },
+          {
+            "id": "CNT_002",
+            "name": "Live Streaming",
+            "description": "Watch live sessions remotely",
+            "implementation": "Embedded video player (YouTube/Vimeo/custom)"
+          },
+          {
+            "id": "CNT_003",
+            "name": "Session Recordings",
+            "description": "Watch recorded sessions on-demand",
+            "appwrite_service": "databases.listDocuments('recordings')"
+          },
+          {
+            "id": "CNT_004",
+            "name": "Photo Gallery",
+            "description": "View event photos",
+            "appwrite_service": "storage.listFiles('gallery')"
+          },
+          {
+            "id": "CNT_005",
+            "name": "News & Updates",
+            "description": "Event news feed and announcements",
+            "appwrite_service": "databases.listDocuments('news')"
+          },
+          {
+            "id": "CNT_006",
+            "name": "Sponsor Information",
+            "description": "View sponsor profiles and offers",
+            "appwrite_service": "databases.listDocuments('sponsors')"
+          },
+          {
+            "id": "CNT_007",
+            "name": "FAQ",
+            "description": "Frequently asked questions",
+            "appwrite_service": "databases.listDocuments('faq')"
+          },
+          {
+            "id": "CNT_008",
+            "name": "Event Info",
+            "description": "General event information",
+            "data": ["about", "venue_info", "transportation", "accommodation", "contacts"]
+          }
+        ]
+      },
+  
+      "polls_qa": {
+        "module": "engagement",
+        "description": "Live audience engagement features",
+        "functions": [
+          {
+            "id": "ENG_001",
+            "name": "Live Polls",
+            "description": "Participate in session polls",
+            "appwrite_service": "databases + Realtime for live results"
+          },
+          {
+            "id": "ENG_002",
+            "name": "Q&A Submission",
+            "description": "Submit questions during sessions",
+            "appwrite_service": "databases.createDocument('questions')"
+          },
+          {
+            "id": "ENG_003",
+            "name": "Question Upvoting",
+            "description": "Upvote other attendees' questions",
+            "appwrite_service": "databases.updateDocument() with vote count"
+          },
+          {
+            "id": "ENG_004",
+            "name": "Word Cloud",
+            "description": "Live word cloud generation",
+            "appwrite_service": "Appwrite Functions for word aggregation"
+          },
+          {
+            "id": "ENG_005",
+            "name": "Session Rating",
+            "description": "Rate sessions after attending",
+            "appwrite_service": "databases.createDocument('ratings')"
+          },
+          {
+            "id": "ENG_006",
+            "name": "Emoji Reactions",
+            "description": "Live emoji reactions during sessions",
+            "appwrite_service": "Realtime for instant display"
+          }
+        ]
+      },
+  
+      "gamification": {
+        "module": "gamification",
+        "description": "Engagement rewards and achievements",
+        "functions": [
+          {
+            "id": "GAM_001",
+            "name": "Points System",
+            "description": "Earn points for various activities",
+            "activities": ["check_in", "networking", "poll_participation", "feedback", "social_share"]
+          },
+          {
+            "id": "GAM_002",
+            "name": "Badges",
+            "description": "Unlock achievement badges",
+            "badges": ["first_session", "networker", "early_bird", "feedback_champion", "social_butterfly"]
+          },
+          {
+            "id": "GAM_003",
+            "name": "Leaderboard",
+            "description": "View top engaged attendees",
+            "appwrite_service": "databases.listDocuments() with orderDesc('points')"
+          },
+          {
+            "id": "GAM_004",
+            "name": "Challenges",
+            "description": "Complete event challenges",
+            "examples": ["attend_5_sessions", "connect_10_people", "visit_all_exhibitors"]
+          },
+          {
+            "id": "GAM_005",
+            "name": "Rewards",
+            "description": "Redeem points for rewards",
+            "appwrite_service": "databases.createDocument('redemptions')"
+          },
+          {
+            "id": "GAM_006",
+            "name": "Scavenger Hunt",
+            "description": "QR-based scavenger hunt around venue",
+            "implementation": "Scan QR codes at locations to collect items"
+          }
+        ]
+      },
+  
+      "admin": {
+        "module": "admin",
+        "description": "Event organizer admin features",
+        "functions": [
+          {
+            "id": "ADM_001",
+            "name": "Dashboard",
+            "description": "Event statistics overview",
+            "metrics": ["registrations", "check_ins", "active_users", "popular_sessions"]
+          },
+          {
+            "id": "ADM_002",
+            "name": "Announcements",
+            "description": "Send push notifications to attendees",
+            "appwrite_service": "Appwrite Functions for batch send"
+          },
+          {
+            "id": "ADM_003",
+            "name": "Session Management",
+            "description": "CRUD operations for sessions",
+            "appwrite_service": "databases CRUD"
+          },
+          {
+            "id": "ADM_004",
+            "name": "Speaker Management",
+            "description": "CRUD operations for speakers",
+            "appwrite_service": "databases CRUD"
+          },
+          {
+            "id": "ADM_005",
+            "name": "Attendee Management",
+            "description": "View and manage attendees",
+            "services": ["Clerk Dashboard for user management", "Appwrite for profile data"]
+          },
+          {
+            "id": "ADM_006",
+            "name": "Check-in Scanner",
+            "description": "Scan attendee QR codes for check-in",
+            "implementation": "expo-barcode-scanner"
+          },
+          {
+            "id": "ADM_007",
+            "name": "Reports Export",
+            "description": "Export attendance and engagement data",
+            "formats": ["csv", "pdf"]
+          },
+          {
+            "id": "ADM_008",
+            "name": "Content Upload",
+            "description": "Upload session materials and media",
+            "appwrite_service": "storage.createFile()"
+          }
+        ]
+      },
+  
+      "offline_support": {
+        "module": "offline",
+        "description": "Offline functionality for poor connectivity",
+        "functions": [
+          {
+            "id": "OFF_001",
+            "name": "Offline Agenda",
+            "description": "Cache schedule for offline access",
+            "implementation": "MMKV storage + TanStack Query persistence"
+          },
+          {
+            "id": "OFF_002",
+            "name": "Offline Map",
+            "description": "Cache venue maps locally",
+            "implementation": "Local SVG/image assets"
+          },
+          {
+            "id": "OFF_003",
+            "name": "Offline Speaker Profiles",
+            "description": "Cache speaker data",
+            "implementation": "MMKV + image caching"
+          },
+          {
+            "id": "OFF_004",
+            "name": "Queue Actions",
+            "description": "Queue bookmarks and messages for sync",
+            "implementation": "Offline queue with retry on reconnect"
+          },
+          {
+            "id": "OFF_005",
+            "name": "Sync Indicator",
+            "description": "Show sync status to user",
+            "implementation": "Network state listener + UI indicator"
+          }
+        ]
+      },
+  
+      "accessibility": {
+        "module": "a11y",
+        "description": "Accessibility features",
+        "functions": [
+          {
+            "id": "A11Y_001",
+            "name": "Screen Reader Support",
+            "description": "Full VoiceOver/TalkBack compatibility",
+            "implementation": "Proper accessibilityLabel and accessibilityHint"
+          },
+          {
+            "id": "A11Y_002",
+            "name": "Dynamic Font Sizing",
+            "description": "Respect system font size settings",
+            "implementation": "Use system font scaling"
+          },
+          {
+            "id": "A11Y_003",
+            "name": "High Contrast Mode",
+            "description": "Enhanced contrast option",
+            "implementation": "Alternative color theme"
+          },
+          {
+            "id": "A11Y_004",
+            "name": "Reduced Motion",
+            "description": "Respect reduced motion preference",
+            "implementation": "useReducedMotion hook"
+          }
+        ]
+      },
+  
+      "localization": {
+        "module": "i18n",
+        "description": "Multi-language support",
+        "functions": [
+          {
+            "id": "I18N_001",
+            "name": "Multi-language UI",
+            "description": "Support multiple interface languages",
+            "implementation": "i18next / expo-localization",
+            "languages": ["en", "ar", "km", "fr", "es", "zh"]
+          },
+          {
+            "id": "I18N_002",
+            "name": "RTL Support",
+            "description": "Right-to-left layout for Arabic",
+            "implementation": "I18nManager.forceRTL()"
+          },
+          {
+            "id": "I18N_003",
+            "name": "Content Translation",
+            "description": "Multilingual session content",
+            "appwrite_service": "Store translations in document fields"
+          },
+          {
+            "id": "I18N_004",
+            "name": "Date/Time Localization",
+            "description": "Localized date and time formats",
+            "implementation": "date-fns with locale"
+          }
+        ]
+      }
+    },
+  
+    "database_schema": {
+      "collections": {
+        "users": {
+          "description": "Extended user profiles (synced from Clerk)",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true, "description": "Clerk user ID - primary identifier" },
+            { "key": "email", "type": "string", "required": true },
+            { "key": "fullName", "type": "string", "required": true },
+            { "key": "avatar", "type": "string", "required": false, "description": "Storage file ID or Clerk image URL" },
+            { "key": "title", "type": "string", "required": false },
+            { "key": "organization", "type": "string", "required": false },
+            { "key": "bio", "type": "string", "required": false, "size": 1000 },
+            { "key": "interests", "type": "string[]", "required": false },
+            { "key": "socialLinks", "type": "object", "required": false },
+            { "key": "role", "type": "enum", "elements": ["attendee", "speaker", "organizer", "admin"] },
+            { "key": "isPublic", "type": "boolean", "default": true },
+            { "key": "notificationSettings", "type": "object", "required": false },
+            { "key": "points", "type": "integer", "default": 0 },
+            { "key": "badges", "type": "string[]", "required": false },
+            { "key": "pushTokens", "type": "string[]", "required": false, "description": "Expo push tokens" },
+            { "key": "clerkOrgId", "type": "string", "required": false, "description": "Clerk organization ID if applicable" },
+            { "key": "ssoProvider", "type": "string", "required": false, "description": "SSO provider used (google, saml, etc.)" },
+            { "key": "createdAt", "type": "datetime", "required": true },
+            { "key": "updatedAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkUserId", "type": "unique" },
+            { "key": "email", "type": "unique" },
+            { "key": "role", "type": "key" },
+            { "key": "fullName", "type": "fulltext" },
+            { "key": "clerkOrgId", "type": "key" }
+          ]
+        },
+  
+        "events": {
+          "description": "Main event/conference",
+          "attributes": [
+            { "key": "title", "type": "string", "required": true },
+            { "key": "description", "type": "string", "required": true, "size": 5000 },
+            { "key": "startDate", "type": "datetime", "required": true },
+            { "key": "endDate", "type": "datetime", "required": true },
+            { "key": "venue", "type": "string", "required": true },
+            { "key": "venueAddress", "type": "string", "required": false },
+            { "key": "venueCoordinates", "type": "object", "required": false },
+            { "key": "timezone", "type": "string", "required": true },
+            { "key": "bannerImage", "type": "string", "required": false },
+            { "key": "status", "type": "enum", "elements": ["draft", "published", "ongoing", "completed"] },
+            { "key": "settings", "type": "object", "required": false },
+            { "key": "clerkOrgId", "type": "string", "required": false, "description": "Clerk org that owns this event" }
+          ]
+        },
+  
+        "sessions": {
+          "description": "Event sessions/talks",
+          "attributes": [
+            { "key": "eventId", "type": "string", "required": true },
+            { "key": "title", "type": "string", "required": true },
+            { "key": "description", "type": "string", "required": false, "size": 2000 },
+            { "key": "type", "type": "enum", "elements": ["keynote", "panel", "workshop", "networking", "breakout", "exhibition"] },
+            { "key": "track", "type": "string", "required": false },
+            { "key": "startTime", "type": "datetime", "required": true },
+            { "key": "endTime", "type": "datetime", "required": true },
+            { "key": "room", "type": "string", "required": true },
+            { "key": "floor", "type": "string", "required": false },
+            { "key": "speakerIds", "type": "string[]", "required": false },
+            { "key": "capacity", "type": "integer", "required": false },
+            { "key": "currentAttendees", "type": "integer", "default": 0 },
+            { "key": "materials", "type": "string[]", "required": false, "description": "Storage file IDs" },
+            { "key": "livestreamUrl", "type": "string", "required": false },
+            { "key": "recordingUrl", "type": "string", "required": false },
+            { "key": "tags", "type": "string[]", "required": false },
+            { "key": "isFeatured", "type": "boolean", "default": false },
+            { "key": "status", "type": "enum", "elements": ["scheduled", "live", "completed", "cancelled"] }
+          ],
+          "indexes": [
+            { "key": "eventId", "type": "key" },
+            { "key": "startTime", "type": "key" },
+            { "key": "type", "type": "key" },
+            { "key": "track", "type": "key" },
+            { "key": "title", "type": "fulltext" }
+          ]
+        },
+  
+        "speakers": {
+          "description": "Speaker profiles",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": false, "description": "Link to Clerk user if registered" },
+            { "key": "name", "type": "string", "required": true },
+            { "key": "photo", "type": "string", "required": false },
+            { "key": "title", "type": "string", "required": true },
+            { "key": "organization", "type": "string", "required": true },
+            { "key": "bio", "type": "string", "required": false, "size": 2000 },
+            { "key": "expertise", "type": "string[]", "required": false },
+            { "key": "socialLinks", "type": "object", "required": false },
+            { "key": "isFeatured", "type": "boolean", "default": false },
+            { "key": "sortOrder", "type": "integer", "default": 0 }
+          ],
+          "indexes": [
+            { "key": "name", "type": "fulltext" },
+            { "key": "isFeatured", "type": "key" },
+            { "key": "clerkUserId", "type": "key" }
+          ]
+        },
+  
+        "bookmarks": {
+          "description": "User session bookmarks",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "sessionId", "type": "string", "required": true },
+            { "key": "reminderTime", "type": "integer", "required": false, "description": "Minutes before session" },
+            { "key": "notes", "type": "string", "required": false, "size": 1000 },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkUserId_sessionId", "type": "unique", "attributes": ["clerkUserId", "sessionId"] },
+            { "key": "clerkUserId", "type": "key" }
+          ]
+        },
+  
+        "connections": {
+          "description": "User connections/contacts",
+          "attributes": [
+            { "key": "requesterId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "recipientId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "status", "type": "enum", "elements": ["pending", "accepted", "declined"] },
+            { "key": "message", "type": "string", "required": false },
+            { "key": "createdAt", "type": "datetime", "required": true },
+            { "key": "updatedAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "requesterId", "type": "key" },
+            { "key": "recipientId", "type": "key" },
+            { "key": "status", "type": "key" }
+          ]
+        },
+  
+        "messages": {
+          "description": "Direct messages between users",
+          "attributes": [
+            { "key": "conversationId", "type": "string", "required": true },
+            { "key": "senderId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "recipientId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "content", "type": "string", "required": true, "size": 2000 },
+            { "key": "type", "type": "enum", "elements": ["text", "image", "file"], "default": "text" },
+            { "key": "attachmentId", "type": "string", "required": false },
+            { "key": "isRead", "type": "boolean", "default": false },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "conversationId", "type": "key" },
+            { "key": "senderId", "type": "key" },
+            { "key": "recipientId", "type": "key" },
+            { "key": "createdAt", "type": "key" }
+          ]
+        },
+  
+        "conversations": {
+          "description": "Chat conversation metadata",
+          "attributes": [
+            { "key": "participantIds", "type": "string[]", "required": true, "description": "Clerk user IDs" },
+            { "key": "lastMessageId", "type": "string", "required": false },
+            { "key": "lastMessageAt", "type": "datetime", "required": false },
+            { "key": "lastMessagePreview", "type": "string", "required": false }
+          ],
+          "indexes": [
+            { "key": "participantIds", "type": "key" },
+            { "key": "lastMessageAt", "type": "key" }
+          ]
+        },
+  
+        "meeting_requests": {
+          "description": "Meeting scheduling requests",
+          "attributes": [
+            { "key": "requesterId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "recipientId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "proposedTimes", "type": "object[]", "required": true },
+            { "key": "confirmedTime", "type": "datetime", "required": false },
+            { "key": "location", "type": "string", "required": false },
+            { "key": "purpose", "type": "string", "required": false },
+            { "key": "status", "type": "enum", "elements": ["pending", "accepted", "declined", "cancelled"] },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ]
+        },
+  
+        "check_ins": {
+          "description": "Session attendance records",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "sessionId", "type": "string", "required": true },
+            { "key": "checkInTime", "type": "datetime", "required": true },
+            { "key": "checkOutTime", "type": "datetime", "required": false },
+            { "key": "method", "type": "enum", "elements": ["qr", "nfc", "geofence", "manual"] },
+            { "key": "location", "type": "object", "required": false }
+          ],
+          "indexes": [
+            { "key": "clerkUserId_sessionId", "type": "unique", "attributes": ["clerkUserId", "sessionId"] },
+            { "key": "sessionId", "type": "key" }
+          ]
+        },
+  
+        "notifications": {
+          "description": "In-app notifications",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "type", "type": "enum", "elements": ["session_reminder", "message", "connection", "announcement", "schedule_change"] },
+            { "key": "title", "type": "string", "required": true },
+            { "key": "body", "type": "string", "required": true },
+            { "key": "data", "type": "object", "required": false },
+            { "key": "isRead", "type": "boolean", "default": false },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkUserId", "type": "key" },
+            { "key": "isRead", "type": "key" },
+            { "key": "createdAt", "type": "key" }
+          ]
+        },
+  
+        "feedback": {
+          "description": "Session feedback and ratings",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "sessionId", "type": "string", "required": true },
+            { "key": "rating", "type": "integer", "required": true, "min": 1, "max": 5 },
+            { "key": "comment", "type": "string", "required": false, "size": 1000 },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkUserId_sessionId", "type": "unique", "attributes": ["clerkUserId", "sessionId"] },
+            { "key": "sessionId", "type": "key" }
+          ]
+        },
+  
+        "polls": {
+          "description": "Live session polls",
+          "attributes": [
+            { "key": "sessionId", "type": "string", "required": true },
+            { "key": "question", "type": "string", "required": true },
+            { "key": "options", "type": "object[]", "required": true },
+            { "key": "type", "type": "enum", "elements": ["single", "multiple", "rating", "open"] },
+            { "key": "isActive", "type": "boolean", "default": false },
+            { "key": "showResults", "type": "boolean", "default": false },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ]
+        },
+  
+        "poll_responses": {
+          "description": "User poll responses",
+          "attributes": [
+            { "key": "pollId", "type": "string", "required": true },
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "response", "type": "object", "required": true },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "pollId_clerkUserId", "type": "unique", "attributes": ["pollId", "clerkUserId"] }
+          ]
+        },
+  
+        "questions": {
+          "description": "Q&A session questions",
+          "attributes": [
+            { "key": "sessionId", "type": "string", "required": true },
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "content", "type": "string", "required": true, "size": 500 },
+            { "key": "upvotes", "type": "integer", "default": 0 },
+            { "key": "upvotedBy", "type": "string[]", "required": false },
+            { "key": "isAnswered", "type": "boolean", "default": false },
+            { "key": "isApproved", "type": "boolean", "default": true },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "sessionId", "type": "key" },
+            { "key": "upvotes", "type": "key" }
+          ]
+        },
+  
+        "exhibitors": {
+          "description": "Exhibition booth information",
+          "attributes": [
+            { "key": "eventId", "type": "string", "required": true },
+            { "key": "name", "type": "string", "required": true },
+            { "key": "description", "type": "string", "required": false, "size": 1000 },
+            { "key": "logo", "type": "string", "required": false },
+            { "key": "boothNumber", "type": "string", "required": true },
+            { "key": "floor", "type": "string", "required": false },
+            { "key": "category", "type": "string", "required": false },
+            { "key": "website", "type": "string", "required": false },
+            { "key": "socialLinks", "type": "object", "required": false }
+          ]
+        },
+  
+        "sponsors": {
+          "description": "Event sponsors",
+          "attributes": [
+            { "key": "eventId", "type": "string", "required": true },
+            { "key": "name", "type": "string", "required": true },
+            { "key": "logo", "type": "string", "required": true },
+            { "key": "tier", "type": "enum", "elements": ["platinum", "gold", "silver", "bronze", "partner"] },
+            { "key": "description", "type": "string", "required": false },
+            { "key": "website", "type": "string", "required": false },
+            { "key": "sortOrder", "type": "integer", "default": 0 }
+          ]
+        },
+  
+        "news": {
+          "description": "Event news and announcements",
+          "attributes": [
+            { "key": "eventId", "type": "string", "required": true },
+            { "key": "title", "type": "string", "required": true },
+            { "key": "content", "type": "string", "required": true, "size": 5000 },
+            { "key": "image", "type": "string", "required": false },
+            { "key": "isPinned", "type": "boolean", "default": false },
+            { "key": "publishedAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "eventId", "type": "key" },
+            { "key": "publishedAt", "type": "key" }
+          ]
+        },
+  
+        "follows": {
+          "description": "Speaker follows",
+          "attributes": [
+            { "key": "clerkUserId", "type": "string", "required": true },
+            { "key": "speakerId", "type": "string", "required": true },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkUserId_speakerId", "type": "unique", "attributes": ["clerkUserId", "speakerId"] }
+          ]
+        },
+  
+        "blocks": {
+          "description": "Blocked users",
+          "attributes": [
+            { "key": "blockerId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "blockedId", "type": "string", "required": true, "description": "Clerk user ID" },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "blockerId_blockedId", "type": "unique", "attributes": ["blockerId", "blockedId"] }
+          ]
+        },
+  
+        "organizations": {
+          "description": "Synced from Clerk Organizations",
+          "attributes": [
+            { "key": "clerkOrgId", "type": "string", "required": true },
+            { "key": "name", "type": "string", "required": true },
+            { "key": "slug", "type": "string", "required": true },
+            { "key": "logo", "type": "string", "required": false },
+            { "key": "ssoEnabled", "type": "boolean", "default": false },
+            { "key": "ssoProvider", "type": "string", "required": false },
+            { "key": "createdAt", "type": "datetime", "required": true }
+          ],
+          "indexes": [
+            { "key": "clerkOrgId", "type": "unique" },
+            { "key": "slug", "type": "unique" }
+          ]
+        }
+      },
+  
+      "storage_buckets": [
+        {
+          "id": "avatars",
+          "name": "User Avatars",
+          "permissions": ["read:any", "create:users", "update:users", "delete:users"],
+          "maxFileSize": 5242880,
+          "allowedExtensions": ["jpg", "jpeg", "png", "webp"]
+        },
+        {
+          "id": "speaker-photos",
+          "name": "Speaker Photos",
+          "permissions": ["read:any", "create:team:admin", "update:team:admin", "delete:team:admin"],
+          "maxFileSize": 10485760,
+          "allowedExtensions": ["jpg", "jpeg", "png", "webp"]
+        },
+        {
+          "id": "session-materials",
+          "name": "Session Materials",
+          "permissions": ["read:users", "create:team:admin", "update:team:admin", "delete:team:admin"],
+          "maxFileSize": 52428800,
+          "allowedExtensions": ["pdf", "ppt", "pptx", "doc", "docx", "xls", "xlsx"]
+        },
+        {
+          "id": "event-media",
+          "name": "Event Media",
+          "permissions": ["read:any", "create:team:admin", "update:team:admin", "delete:team:admin"],
+          "maxFileSize": 104857600,
+          "allowedExtensions": ["jpg", "jpeg", "png", "webp", "mp4", "mov"]
+        },
+        {
+          "id": "chat-attachments",
+          "name": "Chat Attachments",
+          "permissions": ["read:users", "create:users", "update:users", "delete:users"],
+          "maxFileSize": 10485760,
+          "allowedExtensions": ["jpg", "jpeg", "png", "webp", "pdf", "doc", "docx"]
+        }
+      ]
+    },
+  
+    "appwrite_functions": {
+      "functions": [
+        {
+          "id": "clerk-webhook-handler",
+          "name": "Clerk Webhook Handler",
+          "description": "Handles Clerk webhooks to sync users and organizations to Appwrite",
+          "runtime": "node-18.0",
+          "trigger": "http",
+          "path": "/clerk-webhook",
+          "events_handled": [
+            "user.created",
+            "user.updated",
+            "user.deleted",
+            "organization.created",
+            "organization.updated",
+            "organizationMembership.created",
+            "organizationMembership.deleted"
+          ],
+          "variables": ["APPWRITE_ENDPOINT", "APPWRITE_PROJECT_ID", "APPWRITE_API_KEY", "CLERK_WEBHOOK_SECRET"]
+        },
+        {
+          "id": "verify-clerk-token",
+          "name": "Verify Clerk JWT",
+          "description": "Middleware function to verify Clerk JWT tokens for protected operations",
+          "runtime": "node-18.0",
+          "trigger": "http",
+          "variables": ["CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY"]
+        },
+        {
+          "id": "send-session-reminder",
+          "name": "Send Session Reminder",
+          "description": "Sends push notifications for upcoming bookmarked sessions",
+          "runtime": "node-18.0",
+          "trigger": "schedule",
+          "schedule": "*/5 * * * *",
+          "variables": ["APPWRITE_ENDPOINT", "APPWRITE_PROJECT_ID", "APPWRITE_API_KEY"]
+        },
+        {
+          "id": "on-message-created",
+          "name": "New Message Notification",
+          "description": "Sends push notification when a new message is received",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": ["databases.*.collections.messages.documents.*.create"]
+        },
+        {
+          "id": "on-connection-request",
+          "name": "Connection Request Notification",
+          "description": "Notifies user of new connection request",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": ["databases.*.collections.connections.documents.*.create"]
+        },
+        {
+          "id": "on-session-update",
+          "name": "Session Update Notification",
+          "description": "Notifies bookmarked users when session details change",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": ["databases.*.collections.sessions.documents.*.update"]
+        },
+        {
+          "id": "calculate-attendance",
+          "name": "Calculate Session Attendance",
+          "description": "Updates session currentAttendees count on check-in",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": ["databases.*.collections.check_ins.documents.*.create", "databases.*.collections.check_ins.documents.*.delete"]
+        },
+        {
+          "id": "award-points",
+          "name": "Award Gamification Points",
+          "description": "Awards points for various user activities",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": [
+            "databases.*.collections.check_ins.documents.*.create",
+            "databases.*.collections.connections.documents.*.update",
+            "databases.*.collections.feedback.documents.*.create"
+          ]
+        },
+        {
+          "id": "generate-certificate",
+          "name": "Generate Attendance Certificate",
+          "description": "Generates PDF certificate for event attendance",
+          "runtime": "node-18.0",
+          "trigger": "http",
+          "path": "/certificate/:clerkUserId/:eventId"
+        },
+        {
+          "id": "matching-algorithm",
+          "name": "Interest Matching",
+          "description": "Suggests connections based on shared interests",
+          "runtime": "node-18.0",
+          "trigger": "http",
+          "path": "/matches/:clerkUserId"
+        },
+        {
+          "id": "broadcast-announcement",
+          "name": "Broadcast Announcement",
+          "description": "Sends push notification to all event attendees",
+          "runtime": "node-18.0",
+          "trigger": "event",
+          "events": ["databases.*.collections.news.documents.*.create"]
+        },
+        {
+          "id": "cleanup-old-data",
+          "name": "Data Cleanup",
+          "description": "Removes old notifications and temporary data",
+          "runtime": "node-18.0",
+          "trigger": "schedule",
+          "schedule": "0 3 * * *"
+        }
+      ]
+    },
+  
+    "project_structure": {
+      "root": "wise-event-app",
+      "structure": {
+        "src": {
+          "app": {
+            "_layout.tsx": "Root layout with ClerkProvider and other providers",
+            "index.tsx": "Entry point / splash redirect",
+            "(auth)": {
+              "_layout.tsx": "Auth stack layout (public routes)",
+              "sign-in.tsx": "Sign in screen with Clerk",
+              "sign-up.tsx": "Sign up screen with Clerk",
+              "sso-callback.tsx": "SSO OAuth callback handler",
+              "forgot-password.tsx": "Password recovery"
+            },
+            "(app)": {
+              "_layout.tsx": "Protected app layout (requires auth)",
+              "(tabs)": {
+                "_layout.tsx": "Tab navigator layout",
+                "index.tsx": "Home / Dashboard",
+                "schedule.tsx": "Event schedule",
+                "networking.tsx": "Networking hub",
+                "map.tsx": "Venue map",
+                "profile.tsx": "User profile"
+              },
+              "session": {
+                "[id].tsx": "Session details"
+              },
+              "speaker": {
+                "[id].tsx": "Speaker profile"
+              },
+              "attendee": {
+                "[id].tsx": "Attendee profile"
+              },
+              "chat": {
+                "[conversationId].tsx": "Chat conversation"
+              },
+              "qr-scanner.tsx": "QR code scanner",
+              "my-agenda.tsx": "Personal agenda",
+              "notifications.tsx": "Notification center",
+              "settings.tsx": "App settings",
+              "organization.tsx": "Organization settings (if using Clerk orgs)"
+            }
+          },
+          "components": {
+            "auth": {
+              "SignInForm.tsx": "Custom sign-in form with SSO buttons",
+              "SignUpForm.tsx": "Custom sign-up form",
+              "SSOButtons.tsx": "Social and Enterprise SSO buttons",
+              "MFAVerification.tsx": "MFA verification component",
+              "ProtectedRoute.tsx": "Route protection wrapper"
+            },
+            "ui": {
+              "Button.tsx": "Custom button component",
+              "Card.tsx": "Card component",
+              "Input.tsx": "Form input component",
+              "Avatar.tsx": "User avatar component",
+              "Badge.tsx": "Badge/tag component",
+              "Modal.tsx": "Modal component",
+              "Loading.tsx": "Loading indicators",
+              "Empty.tsx": "Empty state component"
+            },
+            "session": {
+              "SessionCard.tsx": "Session list item",
+              "SessionList.tsx": "Session list container",
+              "SessionFilters.tsx": "Filter controls",
+              "BookmarkButton.tsx": "Bookmark toggle"
+            },
+            "speaker": {
+              "SpeakerCard.tsx": "Speaker list item",
+              "SpeakerList.tsx": "Speaker grid/list"
+            },
+            "networking": {
+              "AttendeeCard.tsx": "Attendee list item",
+              "ConnectionButton.tsx": "Connect/pending button",
+              "ChatBubble.tsx": "Chat message bubble",
+              "ChatInput.tsx": "Message input"
+            },
+            "map": {
+              "VenueMap.tsx": "Interactive map component",
+              "FloorSelector.tsx": "Floor switch tabs",
+              "POIMarker.tsx": "Point of interest marker"
+            },
+            "notifications": {
+              "NotificationItem.tsx": "Notification list item",
+              "NotificationBadge.tsx": "Unread count badge"
+            }
+          },
+          "services": {
+            "appwrite.ts": "Appwrite client setup",
+            "database.ts": "Database operations",
+            "storage.ts": "File storage operations",
+            "realtime.ts": "Realtime subscriptions",
+            "notifications.ts": "Push notification setup"
+          },
+          "hooks": {
+            "useClerkAuth.ts": "Custom Clerk authentication hook",
+            "useUserSync.ts": "Sync Clerk user to Appwrite",
+            "useSessions.ts": "Sessions data hook",
+            "useSpeakers.ts": "Speakers data hook",
+            "useBookmarks.ts": "Bookmarks management hook",
+            "useConnections.ts": "Connections hook",
+            "useMessages.ts": "Chat messages hook",
+            "useNotifications.ts": "Notifications hook",
+            "useRealtime.ts": "Realtime subscription hook",
+            "useOffline.ts": "Offline state hook"
+          },
+          "stores": {
+            "uiStore.ts": "UI state (modals, etc.)",
+            "offlineStore.ts": "Offline queue state"
+          },
+          "lib": {
+            "constants.ts": "App constants",
+            "utils.ts": "Utility functions",
+            "validators.ts": "Zod schemas",
+            "queryClient.ts": "React Query setup",
+            "i18n.ts": "Internationalization setup",
+            "clerk.ts": "Clerk configuration helpers"
+          },
+          "types": {
+            "index.ts": "TypeScript type definitions",
+            "appwrite.ts": "Appwrite document types",
+            "clerk.ts": "Clerk user types",
+            "navigation.ts": "Navigation param types"
+          },
+          "assets": {
+            "images": {},
+            "fonts": {},
+            "maps": {}
+          }
+        },
+        "app.json": "Expo configuration",
+        "eas.json": "EAS Build configuration",
+        "tsconfig.json": "TypeScript configuration",
+        "package.json": "Dependencies"
+      }
+    },
+  
+    "dependencies": {
+      "core": {
+        "expo": "~52.0.0",
+        "react": "18.3.1",
+        "react-native": "0.76.x",
+        "expo-router": "~4.0.0",
+        "typescript": "~5.3.0"
+      },
+      "authentication": {
+        "@clerk/clerk-expo": "^2.0.0",
+        "expo-secure-store": "~14.0.0",
+        "expo-web-browser": "~14.0.0",
+        "expo-linking": "~7.0.0"
+      },
+      "appwrite": {
+        "react-native-appwrite": "^0.5.0"
+      },
+      "state_management": {
+        "zustand": "^4.5.0",
+        "@tanstack/react-query": "^5.0.0"
+      },
+      "ui": {
+        "nativewind": "^4.0.0",
+        "tailwindcss": "^3.4.0",
+        "react-native-reanimated": "~3.16.0",
+        "react-native-gesture-handler": "~2.20.0",
+        "@expo/vector-icons": "^14.0.0",
+        "react-native-safe-area-context": "^4.12.0"
+      },
+      "forms": {
+        "react-hook-form": "^7.53.0",
+        "zod": "^3.23.0",
+        "@hookform/resolvers": "^3.9.0"
+      },
+      "storage": {
+        "react-native-mmkv": "^3.1.0"
+      },
+      "features": {
+        "expo-notifications": "~0.29.0",
+        "expo-location": "~18.0.0",
+        "expo-camera": "~16.0.0",
+        "expo-calendar": "~14.0.0",
+        "expo-localization": "~16.0.0",
+        "date-fns": "^4.1.0",
+        "i18next": "^23.0.0",
+        "react-i18next": "^15.0.0"
+      },
+      "dev": {
+        "jest": "^29.0.0",
+        "eslint": "^8.0.0",
+        "prettier": "^3.0.0",
+        "@types/react": "~18.3.0"
+      }
+    },
+  
+    "environment_variables": {
+      "app": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_xxx or pk_live_xxx",
+        "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://cloud.appwrite.io/v1",
+        "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "your-project-id",
+        "EXPO_PUBLIC_APPWRITE_DATABASE_ID": "your-database-id"
+      },
+      "appwrite_functions": {
+        "APPWRITE_ENDPOINT": "https://cloud.appwrite.io/v1",
+        "APPWRITE_PROJECT_ID": "your-project-id",
+        "APPWRITE_API_KEY": "your-api-key",
+        "CLERK_SECRET_KEY": "sk_test_xxx or sk_live_xxx",
+        "CLERK_WEBHOOK_SECRET": "whsec_xxx"
+      }
+    },
+  
+    "clerk_expo_setup": {
+      "step_1_install": "npx expo install @clerk/clerk-expo expo-secure-store expo-web-browser expo-linking",
+      "step_2_app_layout": {
+        "file": "src/app/_layout.tsx",
+        "code_snippet": "import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo'\nimport { tokenCache } from '@/lib/clerk'\n\nexport default function RootLayout() {\n  return (\n    <ClerkProvider\n      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}\n      tokenCache={tokenCache}\n    >\n      <ClerkLoaded>\n        {/* Your app */}\n      </ClerkLoaded>\n    </ClerkProvider>\n  )\n}"
+      },
+      "step_3_token_cache": {
+        "file": "src/lib/clerk.ts",
+        "code_snippet": "import * as SecureStore from 'expo-secure-store'\nimport { TokenCache } from '@clerk/clerk-expo'\n\nexport const tokenCache: TokenCache = {\n  async getToken(key: string) {\n    return SecureStore.getItemAsync(key)\n  },\n  async saveToken(key: string, value: string) {\n    return SecureStore.setItemAsync(key, value)\n  },\n  async clearToken(key: string) {\n    return SecureStore.deleteItemAsync(key)\n  },\n}"
+      },
+      "step_4_protected_routes": {
+        "file": "src/app/(app)/_layout.tsx",
+        "code_snippet": "import { useAuth } from '@clerk/clerk-expo'\nimport { Redirect, Stack } from 'expo-router'\n\nexport default function AppLayout() {\n  const { isSignedIn, isLoaded } = useAuth()\n\n  if (!isLoaded) return <LoadingScreen />\n  if (!isSignedIn) return <Redirect href=\"/sign-in\" />\n\n  return <Stack />\n}"
+      },
+      "step_5_sso_sign_in": {
+        "file": "src/components/auth/SSOButtons.tsx",
+        "code_snippet": "import { useOAuth } from '@clerk/clerk-expo'\nimport * as WebBrowser from 'expo-web-browser'\nimport * as Linking from 'expo-linking'\n\nWebBrowser.maybeCompleteAuthSession()\n\nexport function SSOButtons() {\n  const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' })\n  const { startOAuthFlow: appleAuth } = useOAuth({ strategy: 'oauth_apple' })\n\n  const handleGoogleSSO = async () => {\n    try {\n      const { createdSessionId, setActive } = await googleAuth({\n        redirectUrl: Linking.createURL('/sso-callback'),\n      })\n      if (createdSessionId) {\n        await setActive!({ session: createdSessionId })\n      }\n    } catch (err) {\n      console.error('OAuth error:', err)\n    }\n  }\n\n  return (\n    <>\n      <Button onPress={handleGoogleSSO}>Continue with Google</Button>\n      <Button onPress={handleAppleSSO}>Continue with Apple</Button>\n    </>\n  )\n}"
+      },
+      "step_6_user_sync": {
+        "description": "Sync Clerk user to Appwrite on sign-in",
+        "file": "src/hooks/useUserSync.ts",
+        "code_snippet": "import { useUser } from '@clerk/clerk-expo'\nimport { useEffect } from 'react'\nimport { databases } from '@/services/appwrite'\n\nexport function useUserSync() {\n  const { user, isSignedIn } = useUser()\n\n  useEffect(() => {\n    if (isSignedIn && user) {\n      syncUserToAppwrite(user)\n    }\n  }, [isSignedIn, user])\n\n  async function syncUserToAppwrite(clerkUser: any) {\n    try {\n      await databases.createDocument(\n        DATABASE_ID,\n        'users',\n        clerkUser.id,\n        {\n          clerkUserId: clerkUser.id,\n          email: clerkUser.primaryEmailAddress?.emailAddress,\n          fullName: clerkUser.fullName,\n          avatar: clerkUser.imageUrl,\n          createdAt: new Date().toISOString(),\n          updatedAt: new Date().toISOString(),\n        }\n      )\n    } catch (err: any) {\n      if (err.code === 409) {\n        // User exists, update instead\n        await databases.updateDocument(DATABASE_ID, 'users', clerkUser.id, {\n          fullName: clerkUser.fullName,\n          avatar: clerkUser.imageUrl,\n          updatedAt: new Date().toISOString(),\n        })\n      }\n    }\n  }\n}"
+      }
+    },
+  
+    "deployment": {
+      "mobile": {
+        "tool": "EAS Build",
+        "profiles": {
+          "development": "Internal distribution for testing",
+          "preview": "TestFlight / Internal testing",
+          "production": "App Store / Play Store release"
+        },
+        "ota_updates": "EAS Update for JS bundle updates"
+      },
+      "backend": {
+        "appwrite_cloud": "Managed hosting on Appwrite Cloud",
+        "self_hosted": "Docker deployment option",
+        "clerk": "Managed by Clerk (no self-hosting needed)"
+      }
+    },
+  
+    "security_considerations": [
+      "Clerk handles all sensitive authentication data securely",
+      "Verify Clerk JWT in Appwrite Functions for protected operations",
+      "Use Clerk webhook signature verification",
+      "Implement proper Appwrite permissions for all collections",
+      "Validate all user input with Zod schemas",
+      "Implement rate limiting on Appwrite Functions",
+      "Use HTTPS for all API communications",
+      "Store Clerk token cache in Expo SecureStore",
+      "Add content moderation for user-generated content",
+      "Implement report/block functionality for networking",
+      "Regular security audits and dependency updates",
+      "Enable Clerk's built-in bot protection",
+      "Configure Clerk session lifetime appropriately"
+    ],
+  
+    "performance_optimizations": [
+      "Implement pagination for all list queries",
+      "Use React Query for caching and background refetching",
+      "Optimize images with proper sizing and caching",
+      "Use MMKV for fast local storage",
+      "Implement virtualized lists (FlashList)",
+      "Lazy load screens and components",
+      "Minimize Realtime subscriptions",
+      "Use memo and useCallback appropriately",
+      "Implement offline-first architecture",
+      "Profile and optimize render performance",
+      "Use Clerk's token caching to minimize auth checks"
+    ],
+  
+    "testing_strategy": {
+      "unit_tests": "Jest for business logic and hooks",
+      "component_tests": "React Native Testing Library",
+      "e2e_tests": "Maestro or Detox for user flows",
+      "auth_testing": "Use Clerk test mode with test users",
+      "coverage_target": "80% for critical paths"
+    },
+  
+    "analytics_and_monitoring": {
+      "crash_reporting": "Sentry",
+      "analytics": "Custom events via Appwrite Functions",
+      "performance_monitoring": "Sentry Performance",
+      "auth_analytics": "Clerk Dashboard analytics",
+      "user_feedback": "In-app feedback form"
+    }
+  }
+  
