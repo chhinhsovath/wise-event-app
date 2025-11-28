@@ -275,7 +275,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-1',
+    userId: 'clerk-user-1',
     email: 'alex.johnson@gmail.com',
     fullName: 'Alex Johnson',
     avatar: 'https://i.pravatar.cc/150?img=10',
@@ -297,7 +297,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-2',
+    userId: 'clerk-user-2',
     email: 'priya.patel@university.edu',
     fullName: 'Priya Patel',
     avatar: 'https://i.pravatar.cc/150?img=20',
@@ -319,7 +319,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-3',
+    userId: 'clerk-user-3',
     email: 'mark.wilson@startup.io',
     fullName: 'Mark Wilson',
     avatar: 'https://i.pravatar.cc/150?img=30',
@@ -341,7 +341,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-4',
+    userId: 'clerk-user-4',
     email: 'sofia.martinez@school.org',
     fullName: 'Sofia Martinez',
     avatar: 'https://i.pravatar.cc/150?img=40',
@@ -358,7 +358,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-5',
+    userId: 'clerk-user-5',
     email: 'david.lee@nonprofit.org',
     fullName: 'David Lee',
     avatar: 'https://i.pravatar.cc/150?img=50',
@@ -379,7 +379,7 @@ export const mockAttendees: UserProfile[] = [
     $createdAt: '2024-11-01T00:00:00.000Z',
     $updatedAt: '2024-11-01T00:00:00.000Z',
     $permissions: [],
-    clerkUserId: 'clerk-user-6',
+    userId: 'clerk-user-6',
     email: 'emma.brown@company.com',
     fullName: 'Emma Brown',
     avatar: 'https://i.pravatar.cc/150?img=60',
@@ -431,12 +431,12 @@ export const mockConnections: Connection[] = [
 
 // Get attendee by ID
 export function getAttendeeById(id: string): UserProfile | undefined {
-  return mockAttendees.find((attendee) => attendee.$id === id || attendee.clerkUserId === id);
+  return mockAttendees.find((attendee) => attendee.$id === id || attendee.userId === id);
 }
 
 // Get attendee by Clerk User ID
-export function getAttendeeByClerkId(clerkUserId: string): UserProfile | undefined {
-  return mockAttendees.find((attendee) => attendee.clerkUserId === clerkUserId);
+export function getAttendeeByClerkId(userId: string): UserProfile | undefined {
+  return mockAttendees.find((attendee) => attendee.userId === userId);
 }
 
 // Search attendees
@@ -454,25 +454,25 @@ export function searchAttendees(query: string): UserProfile[] {
 }
 
 // Get connections for a user
-export function getUserConnections(clerkUserId: string): Connection[] {
+export function getUserConnections(userId: string): Connection[] {
   return mockConnections.filter(
     (conn) =>
-      (conn.requesterId === clerkUserId || conn.recipientId === clerkUserId) &&
+      (conn.requesterId === userId || conn.recipientId === userId) &&
       conn.status === 'accepted'
   );
 }
 
 // Get pending connection requests for a user
-export function getPendingRequests(clerkUserId: string): Connection[] {
+export function getPendingRequests(userId: string): Connection[] {
   return mockConnections.filter(
-    (conn) => conn.recipientId === clerkUserId && conn.status === 'pending'
+    (conn) => conn.recipientId === userId && conn.status === 'pending'
   );
 }
 
 // Get sent connection requests
-export function getSentRequests(clerkUserId: string): Connection[] {
+export function getSentRequests(userId: string): Connection[] {
   return mockConnections.filter(
-    (conn) => conn.requesterId === clerkUserId && conn.status === 'pending'
+    (conn) => conn.requesterId === userId && conn.status === 'pending'
   );
 }
 

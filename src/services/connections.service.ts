@@ -15,15 +15,15 @@ export class ConnectionsService {
   /**
    * Get all connections for a user (sent or received)
    */
-  static async getUserConnections(clerkUserId: string): Promise<Connection[]> {
+  static async getUserConnections(userId: string): Promise<Connection[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
           Query.or([
-            Query.equal('requesterId', clerkUserId),
-            Query.equal('recipientId', clerkUserId),
+            Query.equal('requesterId', userId),
+            Query.equal('recipientId', userId),
           ]),
           Query.orderDesc('$createdAt'),
           Query.limit(1000),
@@ -40,15 +40,15 @@ export class ConnectionsService {
   /**
    * Get accepted connections only
    */
-  static async getAcceptedConnections(clerkUserId: string): Promise<Connection[]> {
+  static async getAcceptedConnections(userId: string): Promise<Connection[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
           Query.or([
-            Query.equal('requesterId', clerkUserId),
-            Query.equal('recipientId', clerkUserId),
+            Query.equal('requesterId', userId),
+            Query.equal('recipientId', userId),
           ]),
           Query.equal('status', 'accepted'),
           Query.orderDesc('$createdAt'),
@@ -66,13 +66,13 @@ export class ConnectionsService {
   /**
    * Get pending requests received by user
    */
-  static async getPendingRequests(clerkUserId: string): Promise<Connection[]> {
+  static async getPendingRequests(userId: string): Promise<Connection[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
-          Query.equal('recipientId', clerkUserId),
+          Query.equal('recipientId', userId),
           Query.equal('status', 'pending'),
           Query.orderDesc('$createdAt'),
           Query.limit(100),
@@ -89,13 +89,13 @@ export class ConnectionsService {
   /**
    * Get pending requests sent by user
    */
-  static async getSentRequests(clerkUserId: string): Promise<Connection[]> {
+  static async getSentRequests(userId: string): Promise<Connection[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
-          Query.equal('requesterId', clerkUserId),
+          Query.equal('requesterId', userId),
           Query.equal('status', 'pending'),
           Query.orderDesc('$createdAt'),
           Query.limit(100),
@@ -273,15 +273,15 @@ export class ConnectionsService {
   /**
    * Get connection count for a user
    */
-  static async getConnectionCount(clerkUserId: string): Promise<number> {
+  static async getConnectionCount(userId: string): Promise<number> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
           Query.or([
-            Query.equal('requesterId', clerkUserId),
-            Query.equal('recipientId', clerkUserId),
+            Query.equal('requesterId', userId),
+            Query.equal('recipientId', userId),
           ]),
           Query.equal('status', 'accepted'),
           Query.limit(1),
@@ -298,13 +298,13 @@ export class ConnectionsService {
   /**
    * Get pending requests count
    */
-  static async getPendingRequestsCount(clerkUserId: string): Promise<number> {
+  static async getPendingRequestsCount(userId: string): Promise<number> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
-          Query.equal('recipientId', clerkUserId),
+          Query.equal('recipientId', userId),
           Query.equal('status', 'pending'),
           Query.limit(1),
         ]

@@ -1,6 +1,6 @@
 import { View, ScrollView, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,7 +14,7 @@ import { format, isAfter, isBefore, addHours } from 'date-fns';
  * Shows event overview, upcoming sessions, and quick actions
  */
 export default function Home() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const router = useRouter();
   const { bookmarkedSessions, toggleBookmark, isBookmarked } = useBookmarks();
 

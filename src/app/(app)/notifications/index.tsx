@@ -3,7 +3,7 @@ import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { Text, Card, Button, Chip, SegmentedButtons, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NotificationsService } from '@/services';
 import { Notification } from '@/types';
@@ -15,7 +15,7 @@ import { formatNotificationTime, clearBadge } from '@/lib/notifications';
  */
 export default function NotificationsCenter() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [loading, setLoading] = useState(true);

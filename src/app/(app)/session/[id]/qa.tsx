@@ -3,7 +3,7 @@ import { View, ScrollView, Pressable, RefreshControl, TextInput, KeyboardAvoidin
 import { Text, Card, Button, Chip, SegmentedButtons, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { QuestionsService } from '@/services';
 import { Question } from '@/types';
@@ -16,7 +16,7 @@ import { useRealtimeQuestions } from '@/hooks/useRealtimeCollection';
  */
 export default function SessionQA() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const { id: sessionId } = useLocalSearchParams<{ id: string }>();
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -203,7 +203,7 @@ export default function SessionQA() {
             <View className="p-4 gap-3">
               {questions.map((question) => {
                 const isUpvoted = hasUserUpvoted(question);
-                const asker = mockAttendees.find((a) => a.id === question.clerkUserId);
+                const asker = mockAttendees.find((a) => a.id === question.userId);
 
                 return (
                   <Card key={question.$id}>

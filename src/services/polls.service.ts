@@ -143,12 +143,12 @@ export class PollsService {
    */
   static async submitVote(
     pollId: string,
-    clerkUserId: string,
+    userId: string,
     optionIds: string[]
   ): Promise<PollVote> {
     try {
       // Check if user already voted
-      const existingVote = await this.getUserVote(pollId, clerkUserId);
+      const existingVote = await this.getUserVote(pollId, userId);
       if (existingVote) {
         throw new Error('User has already voted on this poll');
       }
@@ -160,7 +160,7 @@ export class PollsService {
         'unique()',
         {
           pollId,
-          clerkUserId,
+          userId,
           optionIds,
         }
       );
@@ -180,7 +180,7 @@ export class PollsService {
    */
   static async getUserVote(
     pollId: string,
-    clerkUserId: string
+    userId: string
   ): Promise<PollVote | null> {
     try {
       const response = await databases.listDocuments(
@@ -188,7 +188,7 @@ export class PollsService {
         this.votesCollection,
         [
           Query.equal('pollId', pollId),
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.limit(1),
         ]
       );
@@ -205,8 +205,8 @@ export class PollsService {
   /**
    * Check if user has voted on a poll
    */
-  static async hasUserVoted(pollId: string, clerkUserId: string): Promise<boolean> {
-    const vote = await this.getUserVote(pollId, clerkUserId);
+  static async hasUserVoted(pollId: string, userId: string): Promise<boolean> {
+    const vote = await this.getUserVote(pollId, userId);
     return vote !== null;
   }
 

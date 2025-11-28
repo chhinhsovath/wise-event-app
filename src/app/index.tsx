@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { Redirect } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 
@@ -7,10 +7,10 @@ import { View, ActivityIndicator } from 'react-native';
  * Redirects to appropriate screen based on auth state
  */
 export default function Index() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isAuthenticated: isSignedIn, loading } = useAuth();
 
   // Show loading while checking auth state
-  if (!isLoaded) {
+  if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#3b82f6" />

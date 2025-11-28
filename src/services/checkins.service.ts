@@ -14,14 +14,14 @@ export class CheckInsService {
    * Check in to a session
    */
   static async checkIn(
-    clerkUserId: string,
+    userId: string,
     sessionId: string,
     method: 'qr' | 'nfc' | 'geofence' | 'manual' = 'qr',
     location?: { latitude: number; longitude: number }
   ): Promise<CheckIn> {
     try {
       // Check if already checked in
-      const existing = await this.getActiveCheckIn(clerkUserId, sessionId);
+      const existing = await this.getActiveCheckIn(userId, sessionId);
       if (existing) {
         console.log('[CheckInsService] Already checked in to this session');
         return existing;
@@ -32,7 +32,7 @@ export class CheckInsService {
         this.collectionId,
         'unique()',
         {
-          clerkUserId,
+          userId,
           sessionId,
           checkInTime: new Date().toISOString(),
           method,
@@ -72,7 +72,7 @@ export class CheckInsService {
    * Get active check-in for a user in a session
    */
   static async getActiveCheckIn(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<CheckIn | null> {
     try {
@@ -80,7 +80,7 @@ export class CheckInsService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.equal('sessionId', sessionId),
           Query.isNull('checkOutTime'),
           Query.limit(1),
@@ -100,7 +100,7 @@ export class CheckInsService {
    * Get all check-ins for a user
    */
   static async getUserCheckIns(
-    clerkUserId: string,
+    userId: string,
     limit: number = 100
   ): Promise<CheckIn[]> {
     try {
@@ -108,7 +108,7 @@ export class CheckInsService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.orderDesc('checkInTime'),
           Query.limit(limit),
         ]
@@ -150,7 +150,7 @@ export class CheckInsService {
     try {
       const checkIns = await this.getSessionCheckIns(sessionId);
       // Count unique users
-      const uniqueUsers = new Set(checkIns.map((c) => c.clerkUserId));
+      const uniqueUsers = new Set(checkIns.map((c) => c.userId));
       return uniqueUsers.size;
     } catch (error) {
       console.error('[CheckInsService] Error getting attendance count:', error);
@@ -162,10 +162,10 @@ export class CheckInsService {
    * Check if user is checked in to a session
    */
   static async isCheckedIn(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<boolean> {
-    const checkIn = await this.getActiveCheckIn(clerkUserId, sessionId);
+    const checkIn = await this.getActiveCheckIn(userId, sessionId);
     return checkIn !== null;
   }
 
@@ -173,7 +173,7 @@ export class CheckInsService {
    * Get user's attendance history
    */
   static async getAttendanceHistory(
-    clerkUserId: string,
+    userId: string,
     limit: number = 50
   ): Promise<CheckIn[]> {
     try {
@@ -181,7 +181,7 @@ export class CheckInsService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.isNotNull('checkOutTime'), // Only completed check-ins
           Query.orderDesc('checkInTime'),
           Query.limit(limit),
@@ -198,9 +198,9 @@ export class CheckInsService {
   /**
    * Get total attendance count for a user
    */
-  static async getUserTotalAttendance(clerkUserId: string): Promise<number> {
+  static async getUserTotalAttendance(userId: string): Promise<number> {
     try {
-      const checkIns = await this.getUserCheckIns(clerkUserId, 1000);
+      const checkIns = await this.getUserCheckIns(userId, 1000);
       // Count unique sessions attended
       const uniqueSessions = new Set(
         checkIns.filter((c) => c.checkOutTime).map((c) => c.sessionId)

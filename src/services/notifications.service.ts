@@ -20,7 +20,7 @@ export class NotificationsService {
    * Get all notifications for a user
    */
   static async getUserNotifications(
-    clerkUserId: string,
+    userId: string,
     limit: number = 50
   ): Promise<Notification[]> {
     try {
@@ -28,7 +28,7 @@ export class NotificationsService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.orderDesc('$createdAt'),
           Query.limit(limit),
         ]
@@ -44,13 +44,13 @@ export class NotificationsService {
   /**
    * Get unread notifications for a user
    */
-  static async getUnreadNotifications(clerkUserId: string): Promise<Notification[]> {
+  static async getUnreadNotifications(userId: string): Promise<Notification[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.equal('isRead', false),
           Query.orderDesc('$createdAt'),
           Query.limit(100),
@@ -67,9 +67,9 @@ export class NotificationsService {
   /**
    * Get unread notification count
    */
-  static async getUnreadCount(clerkUserId: string): Promise<number> {
+  static async getUnreadCount(userId: string): Promise<number> {
     try {
-      const notifications = await this.getUnreadNotifications(clerkUserId);
+      const notifications = await this.getUnreadNotifications(userId);
       return notifications.length;
     } catch (error) {
       console.error('[NotificationsService] Error fetching unread count:', error);
@@ -81,7 +81,7 @@ export class NotificationsService {
    * Create a notification
    */
   static async createNotification(
-    clerkUserId: string,
+    userId: string,
     type: string,
     title: string,
     body: string,
@@ -93,7 +93,7 @@ export class NotificationsService {
         this.collectionId,
         'unique()',
         {
-          clerkUserId,
+          userId,
           type,
           title,
           body,
@@ -136,9 +136,9 @@ export class NotificationsService {
   /**
    * Mark all notifications as read for a user
    */
-  static async markAllAsRead(clerkUserId: string): Promise<void> {
+  static async markAllAsRead(userId: string): Promise<void> {
     try {
-      const unreadNotifications = await this.getUnreadNotifications(clerkUserId);
+      const unreadNotifications = await this.getUnreadNotifications(userId);
 
       // Mark each unread notification as read
       await Promise.all(
@@ -167,9 +167,9 @@ export class NotificationsService {
   /**
    * Delete all notifications for a user
    */
-  static async deleteAllNotifications(clerkUserId: string): Promise<void> {
+  static async deleteAllNotifications(userId: string): Promise<void> {
     try {
-      const notifications = await this.getUserNotifications(clerkUserId, 1000);
+      const notifications = await this.getUserNotifications(userId, 1000);
 
       await Promise.all(
         notifications.map((notification) =>
@@ -186,7 +186,7 @@ export class NotificationsService {
    * Get notifications by type
    */
   static async getNotificationsByType(
-    clerkUserId: string,
+    userId: string,
     type: string,
     limit: number = 50
   ): Promise<Notification[]> {
@@ -195,7 +195,7 @@ export class NotificationsService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.equal('type', type),
           Query.orderDesc('$createdAt'),
           Query.limit(limit),
@@ -215,13 +215,13 @@ export class NotificationsService {
 
   // Session reminder notification
   static async createSessionReminderNotification(
-    clerkUserId: string,
+    userId: string,
     sessionId: string,
     sessionTitle: string,
     startTime: Date
   ): Promise<Notification> {
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.SESSION_REMINDER,
       'Session Reminder',
       `"${sessionTitle}" starts soon`,
@@ -231,13 +231,13 @@ export class NotificationsService {
 
   // New message notification
   static async createMessageNotification(
-    clerkUserId: string,
+    userId: string,
     senderName: string,
     conversationId: string,
     messagePreview: string
   ): Promise<Notification> {
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.MESSAGE,
       `New message from ${senderName}`,
       messagePreview,
@@ -247,12 +247,12 @@ export class NotificationsService {
 
   // Connection request notification
   static async createConnectionRequestNotification(
-    clerkUserId: string,
+    userId: string,
     requesterName: string,
     connectionId: string
   ): Promise<Notification> {
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.CONNECTION_REQUEST,
       'New Connection Request',
       `${requesterName} wants to connect with you`,
@@ -262,12 +262,12 @@ export class NotificationsService {
 
   // Connection accepted notification
   static async createConnectionAcceptedNotification(
-    clerkUserId: string,
+    userId: string,
     accepterName: string,
     connectionId: string
   ): Promise<Notification> {
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.CONNECTION_ACCEPTED,
       'Connection Accepted',
       `${accepterName} accepted your connection request`,
@@ -277,13 +277,13 @@ export class NotificationsService {
 
   // Announcement notification
   static async createAnnouncementNotification(
-    clerkUserId: string,
+    userId: string,
     title: string,
     body: string,
     announcementId?: string
   ): Promise<Notification> {
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.ANNOUNCEMENT,
       title,
       body,
@@ -293,7 +293,7 @@ export class NotificationsService {
 
   // Schedule change notification
   static async createScheduleChangeNotification(
-    clerkUserId: string,
+    userId: string,
     sessionId: string,
     sessionTitle: string,
     changeType: 'time' | 'location' | 'cancelled',
@@ -306,7 +306,7 @@ export class NotificationsService {
     };
 
     return this.createNotification(
-      clerkUserId,
+      userId,
       NotificationTypes.SCHEDULE_CHANGE,
       titles[changeType],
       `"${sessionTitle}": ${changeDetails}`,

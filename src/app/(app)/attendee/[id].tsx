@@ -3,7 +3,7 @@ import { Text, Button, Chip, Divider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { getAttendeeById, hasConnectionRequest, mockSessions } from '@/lib/mockData';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 
@@ -14,7 +14,7 @@ import { useState } from 'react';
 export default function AttendeeProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
 
   // Get attendee data

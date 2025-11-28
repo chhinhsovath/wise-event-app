@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
-import { useUser, useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { Button, Avatar, Card, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -12,7 +12,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
  * Shows user info and app settings with Appwrite integration
  */
 export default function Profile() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const { signOut } = useAuth();
   const { profile, loading, error, refreshProfile } = useUserProfile();
   const [refreshing, setRefreshing] = useState(false);

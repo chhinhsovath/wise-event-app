@@ -2,21 +2,22 @@
  * App-wide constants and configuration
  */
 
-// Clerk Configuration
-export const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
-
 // Appwrite Configuration
 export const APPWRITE_ENDPOINT = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 export const APPWRITE_PROJECT_ID = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || '';
 export const APPWRITE_DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID || '';
 
 // Validation
-if (!CLERK_PUBLISHABLE_KEY) {
-  console.warn('⚠️ EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not set');
+if (!APPWRITE_ENDPOINT) {
+  console.warn('⚠️ EXPO_PUBLIC_APPWRITE_ENDPOINT is not set');
 }
 
 if (!APPWRITE_PROJECT_ID) {
   console.warn('⚠️ EXPO_PUBLIC_APPWRITE_PROJECT_ID is not set');
+}
+
+if (!APPWRITE_DATABASE_ID) {
+  console.warn('⚠️ EXPO_PUBLIC_APPWRITE_DATABASE_ID is not set');
 }
 
 // App Configuration

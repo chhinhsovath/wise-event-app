@@ -15,7 +15,7 @@ export class QuestionsService {
    */
   static async submitQuestion(
     sessionId: string,
-    clerkUserId: string,
+    userId: string,
     content: string
   ): Promise<Question> {
     try {
@@ -25,7 +25,7 @@ export class QuestionsService {
         'unique()',
         {
           sessionId,
-          clerkUserId,
+          userId,
           content,
           upvotes: 0,
           upvotedBy: [],
@@ -123,7 +123,7 @@ export class QuestionsService {
    */
   static async getUserQuestions(
     sessionId: string,
-    clerkUserId: string
+    userId: string
   ): Promise<Question[]> {
     try {
       const response = await databases.listDocuments(
@@ -131,7 +131,7 @@ export class QuestionsService {
         this.collectionId,
         [
           Query.equal('sessionId', sessionId),
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.orderDesc('$createdAt'),
           Query.limit(50),
         ]
@@ -149,14 +149,14 @@ export class QuestionsService {
    */
   static async upvoteQuestion(
     questionId: string,
-    clerkUserId: string
+    userId: string
   ): Promise<Question> {
     try {
       // Get current question
       const question = await this.getQuestionById(questionId);
 
       // Check if user already upvoted
-      if (question.upvotedBy.includes(clerkUserId)) {
+      if (question.upvotedBy.includes(userId)) {
         throw new Error('User has already upvoted this question');
       }
 
@@ -167,7 +167,7 @@ export class QuestionsService {
         questionId,
         {
           upvotes: question.upvotes + 1,
-          upvotedBy: [...question.upvotedBy, clerkUserId],
+          upvotedBy: [...question.upvotedBy, userId],
         }
       );
 
@@ -183,14 +183,14 @@ export class QuestionsService {
    */
   static async removeUpvote(
     questionId: string,
-    clerkUserId: string
+    userId: string
   ): Promise<Question> {
     try {
       // Get current question
       const question = await this.getQuestionById(questionId);
 
       // Check if user has upvoted
-      if (!question.upvotedBy.includes(clerkUserId)) {
+      if (!question.upvotedBy.includes(userId)) {
         throw new Error('User has not upvoted this question');
       }
 
@@ -201,7 +201,7 @@ export class QuestionsService {
         questionId,
         {
           upvotes: Math.max(0, question.upvotes - 1),
-          upvotedBy: question.upvotedBy.filter((id) => id !== clerkUserId),
+          upvotedBy: question.upvotedBy.filter((id) => id !== userId),
         }
       );
 
@@ -217,15 +217,15 @@ export class QuestionsService {
    */
   static async toggleUpvote(
     questionId: string,
-    clerkUserId: string
+    userId: string
   ): Promise<Question> {
     try {
       const question = await this.getQuestionById(questionId);
 
-      if (question.upvotedBy.includes(clerkUserId)) {
-        return await this.removeUpvote(questionId, clerkUserId);
+      if (question.upvotedBy.includes(userId)) {
+        return await this.removeUpvote(questionId, userId);
       } else {
-        return await this.upvoteQuestion(questionId, clerkUserId);
+        return await this.upvoteQuestion(questionId, userId);
       }
     } catch (error) {
       console.error('[QuestionsService] Error toggling upvote:', error);

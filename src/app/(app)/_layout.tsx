@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { Redirect, Stack } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -10,11 +10,11 @@ import { useUserSync } from '@/hooks/useUserSync';
  * Automatically syncs user to Appwrite
  */
 export default function AppLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isAuthenticated: isSignedIn, loading } = useAuth();
   const { synced, error } = useUserSync();
 
   // Show loading while checking auth state
-  if (!isLoaded) {
+  if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#3b82f6" />

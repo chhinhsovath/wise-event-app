@@ -3,7 +3,7 @@ import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { Text, Card, Button, Chip, RadioButton, Checkbox, ProgressBar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PollsService } from '@/services';
 import { Poll, PollOption } from '@/types';
@@ -16,7 +16,7 @@ import { useRealtimePolls } from '@/hooks/useRealtimeCollection';
  */
 export default function SessionPolls() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const { id: sessionId } = useLocalSearchParams<{ id: string }>();
 
   const [polls, setPolls] = useState<Poll[]>([]);

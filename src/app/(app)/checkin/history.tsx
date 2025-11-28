@@ -3,7 +3,7 @@ import { View, ScrollView, RefreshControl, Pressable } from 'react-native';
 import { Text, Card, Chip } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CheckInsService } from '@/services';
 import { CheckIn } from '@/types';
@@ -15,7 +15,7 @@ import { mockSessions } from '@/lib/mockData';
  */
 export default function AttendanceHistory() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [totalAttendance, setTotalAttendance] = useState(0);
   const [loading, setLoading] = useState(true);

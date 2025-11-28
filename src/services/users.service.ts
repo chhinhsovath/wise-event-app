@@ -13,21 +13,21 @@ export class UsersService {
   private static collectionId = COLLECTIONS.USERS;
 
   /**
-   * Get user by Clerk user ID
+   * Get user by authenticated user ID
    */
-  static async getUserByClerkId(clerkUserId: string): Promise<UserProfile | null> {
+  static async getUserById(userId: string): Promise<UserProfile | null> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
-        [Query.equal('clerkUserId', clerkUserId), Query.limit(1)]
+        [Query.equal('userId', userId), Query.limit(1)]
       );
 
       return response.documents.length > 0
         ? (response.documents[0] as unknown as UserProfile)
         : null;
     } catch (error) {
-      console.error('[UsersService] Error fetching user by Clerk ID:', error);
+      console.error('[UsersService] Error fetching user by user ID:', error);
       return null;
     }
   }
@@ -51,10 +51,10 @@ export class UsersService {
   }
 
   /**
-   * Create or update user profile (from Clerk sync)
+   * Create or update user profile (from auth sync)
    */
   static async upsertUser(userData: {
-    clerkUserId: string;
+    userId: string;
     email: string;
     fullName: string;
     avatar?: string;
@@ -63,7 +63,7 @@ export class UsersService {
   }): Promise<UserProfile> {
     try {
       // Check if user exists
-      const existingUser = await this.getUserByClerkId(userData.clerkUserId);
+      const existingUser = await this.getUserById(userData.userId);
 
       if (existingUser) {
         // Update existing user
@@ -86,7 +86,7 @@ export class UsersService {
           this.collectionId,
           ID.unique(),
           {
-            clerkUserId: userData.clerkUserId,
+            userId: userData.userId,
             email: userData.email,
             fullName: userData.fullName,
             avatar: userData.avatar || '',
@@ -263,34 +263,34 @@ export class UsersService {
   }
 
   /**
-   * Sync user from Clerk (create if doesn't exist)
-   * Wrapper for upsertUser with Clerk user ID as parameter
+   * Sync user from auth (create if doesn't exist)
+   * Wrapper for upsertUser with authenticated user ID as parameter
    */
-  static async syncUserFromClerk(clerkUserId: string): Promise<UserProfile> {
+  static async syncUser(userId: string): Promise<UserProfile> {
     try {
-      // In real implementation, you would fetch Clerk user data here
+      // In real implementation, you would fetch authenticated user data here
       // For now, we'll create a basic profile
       return await this.upsertUser({
-        clerkUserId,
-        email: `${clerkUserId}@temp.com`, // Should be fetched from Clerk
-        fullName: 'User', // Should be fetched from Clerk
+        userId,
+        email: `${userId}@temp.com`, // Should be fetched from auth
+        fullName: 'User', // Should be fetched from auth
       });
     } catch (error) {
-      console.error('[UsersService] Error syncing user from Clerk:', error);
+      console.error('[UsersService] Error syncing user from auth:', error);
       throw error;
     }
   }
 
   /**
-   * Update user profile by Clerk user ID
+   * Update user profile by authenticated user ID
    */
   static async updateUserProfile(
-    clerkUserId: string,
+    userId: string,
     updates: Partial<UserProfile>
   ): Promise<UserProfile> {
     try {
-      // Get user document ID from Clerk ID
-      const user = await this.getUserByClerkId(clerkUserId);
+      // Get user document ID from user ID
+      const user = await this.getUserById(userId);
 
       if (!user) {
         throw new Error('User not found');

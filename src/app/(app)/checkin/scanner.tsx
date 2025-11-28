@@ -3,7 +3,7 @@ import { View, StyleSheet, Alert, Pressable } from 'react-native';
 import { Text, Button, Card } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { CameraView, Camera } from 'expo-camera';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CheckInsService, SessionsService } from '@/services';
@@ -14,7 +14,7 @@ import { CheckInsService, SessionsService } from '@/services';
  */
 export default function QRScanner() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);

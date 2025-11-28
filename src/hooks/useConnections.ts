@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { Connection } from '@/types';
 import { ConnectionsService, NotificationsService } from '@/services';
 
@@ -9,7 +9,7 @@ import { ConnectionsService, NotificationsService } from '@/services';
  */
 
 export function useConnections() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);

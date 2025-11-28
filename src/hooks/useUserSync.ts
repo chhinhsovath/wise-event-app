@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { databases, client } from '@/services/appwrite';
 import { APPWRITE_DATABASE_ID, COLLECTIONS } from '@/lib/constants';
 import { ID, Query } from 'react-native-appwrite';
 
 /**
  * User Sync Hook
- * Automatically syncs Clerk user to Appwrite database
- * This is CRITICAL for the Clerk + Appwrite hybrid architecture
+ * Automatically syncs authenticated user to Appwrite database
+ * This is CRITICAL for the Appwrite architecture
  */
 export function useUserSync() {
-  const { user, isSignedIn } = useUser();
+  const { user, isAuthenticated: isSignedIn } = useAuth();
   const [synced, setSynced] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,13 +24,13 @@ export function useUserSync() {
     if (!user) return;
 
     try {
-      console.log('[UserSync] Starting sync for user:', user.id);
+      console.log('[UserSync] Starting sync for user:', user.$id);
 
-      // Check if user already exists in Appwrite
+      // Check if user already exists in Appwrite database
       const existingUsers = await databases.listDocuments(
         APPWRITE_DATABASE_ID,
         COLLECTIONS.USERS,
-        [Query.equal('clerkUserId', user.id)]
+        [Query.equal('userId', user.$id)]
       );
 
       if (existingUsers.documents.length > 0) {
@@ -42,9 +42,9 @@ export function useUserSync() {
           COLLECTIONS.USERS,
           existingUsers.documents[0].$id,
           {
-            email: user.primaryEmailAddress?.emailAddress || '',
-            fullName: user.fullName || '',
-            avatar: user.imageUrl || '',
+            email: user.email || '',
+            fullName: user.name || '',
+            avatar: user.prefs?.avatar || '',
             updatedAt: new Date().toISOString(),
           }
         );
@@ -59,10 +59,10 @@ export function useUserSync() {
           COLLECTIONS.USERS,
           ID.unique(),
           {
-            clerkUserId: user.id,
-            email: user.primaryEmailAddress?.emailAddress || '',
-            fullName: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-            avatar: user.imageUrl || '',
+            userId: user.$id,
+            email: user.email || '',
+            fullName: user.name || '',
+            avatar: user.prefs?.avatar || '',
             role: 'attendee', // Default role
             isPublic: true,
             points: 0,

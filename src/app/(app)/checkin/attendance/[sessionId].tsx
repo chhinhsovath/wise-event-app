@@ -56,13 +56,13 @@ export default function SessionAttendance() {
       setCheckIns(checkInsData);
 
       // Load user profiles for all attendees
-      const userIds = [...new Set(checkInsData.map(c => c.clerkUserId))];
+      const userIds = [...new Set(checkInsData.map(c => c.userId))];
       const usersMap = new Map<string, UserProfile>();
 
       await Promise.all(
         userIds.map(async (userId) => {
           try {
-            const user = await UsersService.getUserByClerkId(userId);
+            const user = await UsersService.getUserById(userId);
             if (user) {
               usersMap.set(userId, user);
             }
@@ -95,7 +95,7 @@ export default function SessionAttendance() {
 
     // Filter by search query
     if (searchQuery) {
-      const user = users.get(checkIn.clerkUserId);
+      const user = users.get(checkIn.userId);
       const name = user?.fullName.toLowerCase() || '';
       const query = searchQuery.toLowerCase();
       return name.includes(query);
@@ -290,7 +290,7 @@ export default function SessionAttendance() {
         ) : (
           <View className="px-4 gap-3">
             {filteredCheckIns.map((checkIn) => {
-              const user = users.get(checkIn.clerkUserId);
+              const user = users.get(checkIn.userId);
               const isActive = !checkIn.checkOutTime;
 
               return (

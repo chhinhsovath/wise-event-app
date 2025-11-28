@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -19,7 +19,7 @@ import { Notification } from '@/types';
  * Handles permission, listeners, badge count, and notification data
  */
 export function useNotifications() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [pushToken, setPushToken] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

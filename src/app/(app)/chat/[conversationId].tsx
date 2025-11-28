@@ -3,7 +3,7 @@ import { View, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 
 /**
@@ -21,7 +21,7 @@ interface ChatMessage {
 
 export default function Chat() {
   const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BookmarksService, SessionsService } from '@/services';
 import { Session } from '@/types';
@@ -17,7 +17,7 @@ import {
 const SETTINGS_KEY = 'notificationSettings';
 
 export function useBookmarks() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [bookmarkedSessions, setBookmarkedSessions] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@/hooks/useAuth';
 import { UsersService } from '@/services';
 import { UserProfile } from '@/types';
 
 /**
  * Hook for managing user profile data from Appwrite
- * Syncs with Clerk authentication and provides update functionality
+ * Syncs with authentication and provides update functionality
  */
 export function useUserProfile() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +29,12 @@ export function useUserProfile() {
       setError(null);
 
       // Try to get existing profile from Appwrite
-      let userProfile = await UsersService.getUserByClerkId(user.id);
+      let userProfile = await UsersService.getUserById(user.id);
 
-      // If not found, create profile from Clerk data
+      // If not found, create profile from auth data
       if (!userProfile) {
-        console.log('[useUserProfile] Profile not found, syncing from Clerk...');
-        userProfile = await UsersService.syncUserFromClerk(user.id);
+        console.log('[useUserProfile] Profile not found, syncing from auth...');
+        userProfile = await UsersService.syncUser(user.id);
       }
 
       setProfile(userProfile);

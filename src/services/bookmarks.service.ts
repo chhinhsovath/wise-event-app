@@ -15,13 +15,13 @@ export class BookmarksService {
   /**
    * Get all bookmarks for a user
    */
-  static async getUserBookmarks(clerkUserId: string): Promise<Bookmark[]> {
+  static async getUserBookmarks(userId: string): Promise<Bookmark[]> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.orderDesc('$createdAt'),
           Query.limit(1000),
         ]
@@ -37,9 +37,9 @@ export class BookmarksService {
   /**
    * Get bookmark IDs for a user (for quick lookup)
    */
-  static async getUserBookmarkIds(clerkUserId: string): Promise<string[]> {
+  static async getUserBookmarkIds(userId: string): Promise<string[]> {
     try {
-      const bookmarks = await this.getUserBookmarks(clerkUserId);
+      const bookmarks = await this.getUserBookmarks(userId);
       return bookmarks.map((bookmark) => bookmark.sessionId);
     } catch (error) {
       console.error('[BookmarksService] Error fetching bookmark IDs:', error);
@@ -51,7 +51,7 @@ export class BookmarksService {
    * Check if a session is bookmarked
    */
   static async isSessionBookmarked(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<boolean> {
     try {
@@ -59,7 +59,7 @@ export class BookmarksService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.equal('sessionId', sessionId),
           Query.limit(1),
         ]
@@ -76,7 +76,7 @@ export class BookmarksService {
    * Get a specific bookmark
    */
   static async getBookmark(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<Bookmark | null> {
     try {
@@ -84,7 +84,7 @@ export class BookmarksService {
         this.dbId,
         this.collectionId,
         [
-          Query.equal('clerkUserId', clerkUserId),
+          Query.equal('userId', userId),
           Query.equal('sessionId', sessionId),
           Query.limit(1),
         ]
@@ -103,14 +103,14 @@ export class BookmarksService {
    * Create a bookmark
    */
   static async createBookmark(
-    clerkUserId: string,
+    userId: string,
     sessionId: string,
     reminderTime?: number,
     notes?: string
   ): Promise<Bookmark> {
     try {
       // Check if bookmark already exists
-      const existing = await this.getBookmark(clerkUserId, sessionId);
+      const existing = await this.getBookmark(userId, sessionId);
       if (existing) {
         console.log('[BookmarksService] Bookmark already exists');
         return existing;
@@ -121,7 +121,7 @@ export class BookmarksService {
         this.collectionId,
         ID.unique(),
         {
-          clerkUserId,
+          userId,
           sessionId,
           reminderTime: reminderTime || 15,
           notes: notes || '',
@@ -173,11 +173,11 @@ export class BookmarksService {
    * Delete bookmark by session ID
    */
   static async deleteBookmarkBySession(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<void> {
     try {
-      const bookmark = await this.getBookmark(clerkUserId, sessionId);
+      const bookmark = await this.getBookmark(userId, sessionId);
       if (bookmark) {
         await this.deleteBookmark(bookmark.$id);
       }
@@ -191,11 +191,11 @@ export class BookmarksService {
    * Toggle bookmark (add if not exists, remove if exists)
    */
   static async toggleBookmark(
-    clerkUserId: string,
+    userId: string,
     sessionId: string
   ): Promise<'added' | 'removed'> {
     try {
-      const bookmark = await this.getBookmark(clerkUserId, sessionId);
+      const bookmark = await this.getBookmark(userId, sessionId);
 
       if (bookmark) {
         // Remove bookmark
@@ -203,7 +203,7 @@ export class BookmarksService {
         return 'removed';
       } else {
         // Add bookmark
-        await this.createBookmark(clerkUserId, sessionId);
+        await this.createBookmark(userId, sessionId);
         return 'added';
       }
     } catch (error) {
@@ -215,9 +215,9 @@ export class BookmarksService {
   /**
    * Clear all bookmarks for a user
    */
-  static async clearAllBookmarks(clerkUserId: string): Promise<void> {
+  static async clearAllBookmarks(userId: string): Promise<void> {
     try {
-      const bookmarks = await this.getUserBookmarks(clerkUserId);
+      const bookmarks = await this.getUserBookmarks(userId);
 
       // Delete all bookmarks
       await Promise.all(
@@ -232,12 +232,12 @@ export class BookmarksService {
   /**
    * Get bookmarks count for a user
    */
-  static async getBookmarksCount(clerkUserId: string): Promise<number> {
+  static async getBookmarksCount(userId: string): Promise<number> {
     try {
       const response = await databases.listDocuments(
         this.dbId,
         this.collectionId,
-        [Query.equal('clerkUserId', clerkUserId), Query.limit(1)]
+        [Query.equal('userId', userId), Query.limit(1)]
       );
 
       return response.total;

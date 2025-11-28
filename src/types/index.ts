@@ -2,7 +2,7 @@
  * Common TypeScript types for the WISE Event App
  */
 
-// Clerk User Type (extended from Clerk)
+// Clerk User Type (extended from auth)
 export interface ClerkUser {
   id: string;
   firstName: string | null;
@@ -22,9 +22,9 @@ export interface AppwriteDocument {
   $permissions: string[];
 }
 
-// User Profile (synced from Clerk to Appwrite)
+// User Profile (synced from auth to Appwrite)
 export interface UserProfile extends AppwriteDocument {
-  clerkUserId: string;
+  userId: string;
   email: string;
   fullName: string;
   avatar?: string;
@@ -86,7 +86,7 @@ export interface Session extends AppwriteDocument {
 
 // Speaker
 export interface Speaker extends AppwriteDocument {
-  clerkUserId?: string;
+  userId?: string;
   name: string;
   photo?: string;
   title: string;
@@ -100,7 +100,7 @@ export interface Speaker extends AppwriteDocument {
 
 // Bookmark
 export interface Bookmark extends AppwriteDocument {
-  clerkUserId: string;
+  userId: string;
   sessionId: string;
   reminderTime?: number; // Minutes before session
   notes?: string;
@@ -108,8 +108,8 @@ export interface Bookmark extends AppwriteDocument {
 
 // Connection
 export interface Connection extends AppwriteDocument {
-  requesterId: string; // Clerk user ID
-  recipientId: string; // Clerk user ID
+  requesterId: string; // authenticated user ID
+  recipientId: string; // authenticated user ID
   status: 'pending' | 'accepted' | 'declined';
   message?: string;
 }
@@ -117,8 +117,8 @@ export interface Connection extends AppwriteDocument {
 // Message
 export interface Message extends AppwriteDocument {
   conversationId: string;
-  senderId: string; // Clerk user ID
-  recipientId: string; // Clerk user ID
+  senderId: string; // authenticated user ID
+  recipientId: string; // authenticated user ID
   content: string;
   type: 'text' | 'image' | 'file';
   attachmentId?: string;
@@ -127,7 +127,7 @@ export interface Message extends AppwriteDocument {
 
 // Notification
 export interface Notification extends AppwriteDocument {
-  clerkUserId: string;
+  userId: string;
   type: 'session_reminder' | 'message' | 'connection' | 'announcement' | 'schedule_change';
   title: string;
   body: string;
@@ -137,7 +137,7 @@ export interface Notification extends AppwriteDocument {
 
 // Check-in
 export interface CheckIn extends AppwriteDocument {
-  clerkUserId: string;
+  userId: string;
   sessionId: string;
   checkInTime: string;
   checkOutTime?: string;
@@ -212,20 +212,20 @@ export interface Poll extends AppwriteDocument {
   allowMultiple: boolean;
   showResults: boolean;
   totalVotes: number;
-  createdBy: string; // Clerk user ID
+  createdBy: string; // authenticated user ID
   endTime?: string;
 }
 
 export interface PollVote extends AppwriteDocument {
   pollId: string;
-  clerkUserId: string;
+  userId: string;
   optionIds: string[]; // Array to support multiple choice
 }
 
 // Q&A Types
 export interface Question extends AppwriteDocument {
   sessionId: string;
-  clerkUserId: string;
+  userId: string;
   content: string;
   upvotes: number;
   upvotedBy: string[]; // Array of user IDs who upvoted
